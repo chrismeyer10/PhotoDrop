@@ -10,7 +10,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.photodrop.ui.drive.DriveScreen
+import com.example.photodrop.ui.drive.DriveViewModel
 import com.example.photodrop.ui.foto.FotoAufnahmeScreen
 import kotlinx.coroutines.launch
 
@@ -21,6 +23,9 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val schubladenZustand = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    // ViewModel auf Activity-Ebene — ueberlebt Navigation zwischen Screens
+    val driveViewModel: DriveViewModel = viewModel()
 
     val aktuellerEintrag by navController.currentBackStackEntryAsState()
     val aktuelleRoute = aktuellerEintrag?.destination?.route
@@ -54,6 +59,7 @@ fun AppNavigation() {
             }
             composable(NavigationsZiel.GoogleDrive.route) {
                 DriveScreen(
+                    viewModel = driveViewModel,
                     onMenuOeffnen = { scope.launch { schubladenZustand.open() } }
                 )
             }

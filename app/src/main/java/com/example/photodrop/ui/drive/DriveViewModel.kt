@@ -9,6 +9,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.Scope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,38 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _zustand = MutableStateFlow<DriveZustand>(DriveZustand.NichtVerbunden)
     val zustand: StateFlow<DriveZustand> = _zustand
+
+    init {
+        automatischVerbinden()
+    }
+
+    // Prueft ob bereits ein Konto angemeldet ist und verbindet automatisch.
+    private fun automatischVerbinden() {
+        val konto = GoogleSignIn.getLastSignedInAccount(getApplication()) ?: return
+        _zustand.value = DriveZustand.Verbindet
+        viewModelScope.launch {
+            try {
+                val token = withContext(Dispatchers.IO) {
+                    GoogleAuthUtil.getToken(
+                        getApplication(),
+                        konto.account!!,
+                        "oauth2:https://www.googleapis.com/auth/drive.file"
+                    )
+                }
+                val ordnerId = DriveVerbindung.ordnerSicherstellen(token)
+                if (ordnerId != null) {
+                    _zustand.value = DriveZustand.Verbunden(
+                        kontoName = konto.email ?: konto.displayName ?: "",
+                        ordnerId = ordnerId
+                    )
+                } else {
+                    _zustand.value = DriveZustand.Fehler("Ordner konnte nicht erstellt werden.")
+                }
+            } catch (e: Exception) {
+                _zustand.value = DriveZustand.NichtVerbunden
+            }
+        }
+    }
 
     // Erstellt den Google Sign-In Intent mit Drive-Berechtigung.
     fun anmeldeIntentErstellen(): Intent {
@@ -77,5 +110,16 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
     // Setzt den Zustand zurück damit der Nutzer es erneut versuchen kann.
     fun zuruecksetzen() {
         _zustand.value = DriveZustand.NichtVerbunden
+    }
+
+    // Meldet den Nutzer von Google Drive ab.
+    fun abmelden() {
+        val optionen = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestScopes(Scope("https://www.googleapis.com/auth/drive.file"))
+            .build()
+        GoogleSignIn.getClient(getApplication(), optionen)
+            .signOut()
+            .addOnCompleteListener { _zustand.value = DriveZustand.NichtVerbunden }
     }
 }
