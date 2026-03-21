@@ -20,11 +20,15 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.photodrop.ui.drive.DriveViewModel
 import com.example.photodrop.ui.theme.AkzentFarbe
 import com.example.photodrop.ui.theme.AppHintergrund
 import com.example.photodrop.ui.theme.OberflächenFarbe
@@ -32,19 +36,40 @@ import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextHell
 
 // Stateful: Verbindet den ViewModel mit dem UI.
-// Holt die Fotoliste und die Kamera-Aktion und gibt sie nach unten weiter.
+// Prüft ob ein Drive-Ordner gesetzt ist bevor ein Foto gemacht werden kann.
 @Composable
 fun FotoAufnahmeScreen(
     viewModel: FotoViewModel = viewModel(),
-    onMenuOeffnen: () -> Unit = {}
+    driveViewModel: DriveViewModel = viewModel(),
+    onMenuOeffnen: () -> Unit = {},
+    onZuDrive: () -> Unit = {}
 ) {
     val fotos by viewModel.fotos.collectAsState()
+    var zeigeOrdnerDialog by remember { mutableStateOf(false) }
+
     val fotoAktion = kameraAktionErstellen { viewModel.fotoHinzufuegen(it) }
+
     FotoAufnahmeInhalt(
         fotos = fotos,
-        onFotoAufnehmen = fotoAktion,
+        onFotoAufnehmen = {
+            if (driveViewModel.ordnerName != null) {
+                fotoAktion()
+            } else {
+                zeigeOrdnerDialog = true
+            }
+        },
         onMenuOeffnen = onMenuOeffnen
     )
+
+    if (zeigeOrdnerDialog) {
+        OrdnerFehltDialog(
+            onZuDrive = {
+                zeigeOrdnerDialog = false
+                onZuDrive()
+            },
+            onAbbrechen = { zeigeOrdnerDialog = false }
+        )
+    }
 }
 
 // Stateless: Zeigt die Fotoliste mit TopAppBar und Kamera-Button.
@@ -61,7 +86,6 @@ fun FotoAufnahmeInhalt(
             CenterAlignedTopAppBar(
                 title = { Text("Fotos", color = TextHell) },
                 navigationIcon = {
-                    // Hamburger-Button öffnet die linke Seitenleiste
                     IconButton(onClick = onMenuOeffnen) {
                         Icon(
                             imageVector = Icons.Filled.Menu,
@@ -89,7 +113,6 @@ fun FotoAufnahmeInhalt(
 }
 
 // Runder Kamera-Button unten in der Mitte.
-// Wenn man drückt, wird onFotoAufnehmen ausgelöst.
 @Composable
 private fun KameraAusloeser(onClick: () -> Unit, modifier: Modifier = Modifier) {
     FloatingActionButton(

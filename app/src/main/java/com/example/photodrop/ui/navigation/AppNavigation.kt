@@ -6,11 +6,11 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.photodrop.ui.drive.DriveScreen
 import com.example.photodrop.ui.drive.DriveViewModel
 import com.example.photodrop.ui.foto.FotoAufnahmeScreen
@@ -54,7 +54,13 @@ fun AppNavigation() {
         ) {
             composable(NavigationsZiel.FotoAufnahme.route) {
                 FotoAufnahmeScreen(
-                    onMenuOeffnen = { scope.launch { schubladenZustand.open() } }
+                    driveViewModel = driveViewModel,
+                    onMenuOeffnen = { scope.launch { schubladenZustand.open() } },
+                    onZuDrive = {
+                        navController.navigate(NavigationsZiel.GoogleDrive.route) {
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
             composable(NavigationsZiel.GoogleDrive.route) {
