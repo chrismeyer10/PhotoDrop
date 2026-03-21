@@ -4,11 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.photodrop.ui.foto.FotoAufnahmeScreen
+import com.example.photodrop.ui.navigation.AppNavigation
 import com.example.photodrop.ui.theme.PhotoDropTheme
 
 // Einstiegspunkt der App — Android startet hier.
-// Richtet das Design ein und zeigt den Hauptscreen.
+// Richtet das Design ein und übergibt die Steuerung an AppNavigation.
 class MainActivity : ComponentActivity() {
 
     // Wird einmal aufgerufen wenn die App startet.
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PhotoDropTheme {
-                FotoAufnahmeScreen()
+                AppNavigation()
             }
         }
     }
