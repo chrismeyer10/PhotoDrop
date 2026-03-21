@@ -4,7 +4,8 @@
 
 1. **`CONVENTIONS.md` lesen** und den gesamten Code danach ausrichten
 2. **Neue Conventions erkennen** → sofort in `CONVENTIONS.md` unter "Weitere Konventionen" eintragen
-3. **`code-cleanup` Agent aufrufen** nachdem die Aufgabe abgeschlossen ist
+3. **`code-cleanup` Agent aufrufen** nachdem die Aufgabe abgeschlossen ist *(Kotlin-Code: tote Imports, Duplikate, veraltete Abhängigkeiten)*
+4. **`.gitignore` prüfen** wenn neue Dateien als "Unversioned" auftauchen — IDE-Dateien (.idea/) und Build-Artefakte gehören nie ins Repo
 
 ## Projektübersicht
 
