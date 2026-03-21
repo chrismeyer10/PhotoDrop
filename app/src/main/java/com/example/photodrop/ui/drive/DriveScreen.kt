@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -60,6 +61,7 @@ fun DriveScreen(
         zustand = zustand,
         onVerbinden = { anmeldeLauncher.launch(viewModel.anmeldeIntentErstellen()) },
         onZuruecksetzen = viewModel::zuruecksetzen,
+        onAbmelden = viewModel::abmelden,
         onMenuOeffnen = onMenuOeffnen
     )
 }
@@ -71,6 +73,7 @@ fun DriveInhalt(
     zustand: DriveZustand,
     onVerbinden: () -> Unit,
     onZuruecksetzen: () -> Unit,
+    onAbmelden: () -> Unit = {},
     onMenuOeffnen: () -> Unit = {}
 ) {
     Scaffold(
@@ -84,6 +87,17 @@ fun DriveInhalt(
                             contentDescription = "Menü öffnen",
                             tint = TextHell
                         )
+                    }
+                },
+                actions = {
+                    if (zustand is DriveZustand.Verbunden) {
+                        IconButton(onClick = onAbmelden) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = "Abmelden",
+                                tint = TextGedaempft
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -214,7 +228,8 @@ private fun DriveInhaltNichtVerbundenVorschau() {
         DriveInhalt(
             zustand = DriveZustand.NichtVerbunden,
             onVerbinden = {},
-            onZuruecksetzen = {}
+            onZuruecksetzen = {},
+            onAbmelden = {}
         )
     }
 }
@@ -226,7 +241,8 @@ private fun DriveInhaltVerbindetVorschau() {
         DriveInhalt(
             zustand = DriveZustand.Verbindet,
             onVerbinden = {},
-            onZuruecksetzen = {}
+            onZuruecksetzen = {},
+            onAbmelden = {}
         )
     }
 }
@@ -241,7 +257,8 @@ private fun DriveInhaltVerbundenVorschau() {
                 ordnerId = "abc123"
             ),
             onVerbinden = {},
-            onZuruecksetzen = {}
+            onZuruecksetzen = {},
+            onAbmelden = {}
         )
     }
 }
@@ -253,7 +270,8 @@ private fun DriveInhaltFehlerVorschau() {
         DriveInhalt(
             zustand = DriveZustand.Fehler("Anmeldung fehlgeschlagen: 12500"),
             onVerbinden = {},
-            onZuruecksetzen = {}
+            onZuruecksetzen = {},
+            onAbmelden = {}
         )
     }
 }
