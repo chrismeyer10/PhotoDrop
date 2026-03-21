@@ -24,8 +24,10 @@ Du delegierst gezielt an Spezial-Agents — du implementierst selbst nur wenn n�
 
 ### 1. Kontext lesen
 ```
-Lies CLAUDE.md → Lies CONVENTIONS.md → Verstehe die Aufgabe
+Lies CLAUDE.md → Lies CONVENTIONS.md → Lies WISSEN.md → Verstehe die Aufgabe
 ```
+WISSEN.md enthält den aktuellen Projektstatus, Feature-Übersicht und offene TODOs.
+Wenn WISSEN.md fehlt oder veraltet wirkt: Agent `wissens-agent` aufrufen.
 Wenn die Aufgabe unklar ist: eine kurze Rückfrage stellen.
 
 ### 2. Feature-Branch anlegen (NIEMALS auf main)
