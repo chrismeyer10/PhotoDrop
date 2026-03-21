@@ -2,10 +2,10 @@ package com.example.photodrop.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val AppHintergrund = Color(0xFF0A0A0A)
+val OberflächenFarbe = Color(0xFF141414)
+val KartenFarbe = Color(0xFF1E1E1E)
+val AkzentFarbe = Color(0xFFFF5C5C)
+val AkzentHell = Color(0xFFFF8A80)
+val TextHell = Color(0xFFFFFFFF)
+val TextGedaempft = Color(0xFF6B6B6B)
