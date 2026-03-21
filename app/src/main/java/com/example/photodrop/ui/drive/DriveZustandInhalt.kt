@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -74,28 +73,6 @@ fun LadeInhalt() {
     }
 }
 
-// Zeigt Konto und Ordnerbestätigung nach erfolgreicher Verbindung.
-@Composable
-fun VerbundenInhalt(zustand: DriveZustand.Verbunden) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Filled.CheckCircle,
-            contentDescription = null,
-            tint = AkzentFarbe,
-            modifier = Modifier.size(72.dp)
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Text("Verbunden", color = TextHell)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(zustand.kontoName, color = TextGedaempft)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Ordner bereit", color = AkzentFarbe)
-    }
-}
-
 // Zeigt eine Fehlermeldung mit Retry-Button.
 @Composable
 fun FehlerInhalt(meldung: String, onZuruecksetzen: () -> Unit) {
@@ -128,12 +105,6 @@ private fun NichtVerbundenInhaltVorschau() {
 @Composable
 private fun LadeInhaltVorschau() {
     PhotoDropTheme { LadeInhalt() }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Verbunden")
-@Composable
-private fun VerbundenInhaltVorschau() {
-    PhotoDropTheme { VerbundenInhalt(DriveZustand.Verbunden("max@gmail.com", "id123")) }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Fehler")

@@ -11,6 +11,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -73,13 +74,38 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
 
-    // Baut die Drive-Verbindung auf und aktualisiert den Zustand.
+    // Baut die Drive-Verbindung auf und startet parallel das Laden des Ordnerinhalts.
     private suspend fun verbindungAufbauen(token: String, kontoName: String, name: String) {
         val ordnerId = DriveVerbindung.ordnerSicherstellen(token, name)
-        _zustand.value = if (ordnerId != null) {
-            DriveZustand.Verbunden(kontoName, ordnerId)
+        if (ordnerId != null) {
+            _zustand.value = DriveZustand.Verbunden(kontoName, ordnerId, token)
+            ordnerInhaltLaden(token, kontoName, ordnerId)
         } else {
-            DriveZustand.Fehler("Ordner konnte nicht erstellt werden.")
+            _zustand.value = DriveZustand.Fehler("Ordner konnte nicht erstellt werden.")
+        }
+    }
+
+    // Lädt den Ordnerinhalt — wartet mindestens 2.5s damit die Bereit-Animation sichtbar ist.
+    private suspend fun ordnerInhaltLaden(token: String, kontoName: String, ordnerId: String) {
+        val startZeit = System.currentTimeMillis()
+        val dateien = DriveVerbindung.ordnerInhaltLaden(token, ordnerId)
+        val vergangen = System.currentTimeMillis() - startZeit
+        if (vergangen < MINDEST_ANZEIGEZEIT_MS) delay(MINDEST_ANZEIGEZEIT_MS - vergangen)
+        _zustand.value = DriveZustand.InhaltGeladen(kontoName, ordnerId, dateien)
+    }
+
+    companion object {
+        // Mindestzeit die der Verbunden-Screen sichtbar bleibt (2.5 Sekunden).
+        private const val MINDEST_ANZEIGEZEIT_MS = 2_500L
+    }
+
+    // Aktualisiert den Ordnerinhalt wenn bereits verbunden (z.B. nach neuem Foto).
+    fun inhaltAktualisieren() {
+        val aktuell = _zustand.value as? DriveZustand.InhaltGeladen ?: return
+        viewModelScope.launch {
+            val konto = GoogleSignIn.getLastSignedInAccount(getApplication()) ?: return@launch
+            val token = tokenHolen(konto)
+            ordnerInhaltLaden(token, aktuell.kontoName, aktuell.ordnerId)
         }
     }
 
