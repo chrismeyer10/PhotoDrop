@@ -4,8 +4,9 @@
 
 1. **`CONVENTIONS.md` lesen** und den gesamten Code danach ausrichten
 2. **Neue Conventions erkennen** → sofort in `CONVENTIONS.md` unter "Weitere Konventionen" eintragen
-3. **`code-cleanup` Agent aufrufen** nachdem die Aufgabe abgeschlossen ist *(Kotlin-Code: tote Imports, Duplikate, veraltete Abhängigkeiten)*
-4. **`.gitignore` prüfen** wenn neue Dateien als "Unversioned" auftauchen — IDE-Dateien (.idea/) und Build-Artefakte gehören nie ins Repo
+3. **`build-check` Agent aufrufen** BEVOR ein Commit erstellt wird — `./gradlew compileDebugKotlin` muss fehlerfrei durchlaufen
+4. **`code-cleanup` Agent aufrufen** nachdem die Aufgabe abgeschlossen ist *(Kotlin-Code: tote Imports, Duplikate, veraltete Abhängigkeiten)*
+5. **`.gitignore` prüfen** wenn neue Dateien als "Unversioned" auftauchen — IDE-Dateien (.idea/) und Build-Artefakte gehören nie ins Repo
 
 ## Projektübersicht
 
@@ -23,6 +24,7 @@ Jeder Agent hat klar definierte Tools und einen eigenen Fokus.
 | Agent | Datei | Zweck |
 |-------|-------|-------|
 | `code-cleanup` | `code-cleanup.md` | Findet und löscht überflüssigen/redundanten Code |
+| `build-check` | `build-check.md` | Führt `compileDebugKotlin` aus und meldet/repariert Fehler |
 | `figma-agent` | `figma-agent.md` | Ruft Figma-Designs ab und wandelt sie in Compose-Code um |
 | *Placeholder* | `photo-agent.md` | TODO |
 
