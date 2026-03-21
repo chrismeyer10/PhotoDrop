@@ -66,6 +66,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.anthropic.java)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
