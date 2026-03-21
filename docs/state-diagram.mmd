@@ -20,12 +20,18 @@ stateDiagram-v2
     state DriveScreen {
         [*] --> NichtVerbunden
         NichtVerbunden --> Verbindet : Anmelden
-        Verbindet --> OrdnerBenennen : Kein Ordner gespeichert
-        Verbindet --> Verbunden : Ordner vorhanden
+        Verbindet --> OrdnerLaden : Anmeldung OK
+        OrdnerLaden --> OrdnerAuswaehlen : Ordner vorhanden
+        OrdnerLaden --> OrdnerBenennen : Keine Ordner im Drive
+        OrdnerAuswaehlen --> Verbunden : Ordner ausgewählt
+        OrdnerAuswaehlen --> OrdnerBenennen : Neuen Ordner erstellen
+        OrdnerBenennen --> Verbindet : Bestätigen
+        Verbindet --> Verbunden : Ordner-ID gespeichert (Auto-Reconnect)
         Verbindet --> DriveFehler : Fehler
-        OrdnerBenennen --> Verbindet : Bestaetigen
         DriveFehler --> NichtVerbunden : Zuruecksetzen
+        Verbunden --> InhaltGeladen : Ordnerinhalt geladen
         Verbunden --> NichtVerbunden : Abmelden
+        InhaltGeladen --> NichtVerbunden : Abmelden
     }
 
     state AgentService {
