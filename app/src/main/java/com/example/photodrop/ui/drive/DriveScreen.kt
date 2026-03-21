@@ -2,6 +2,12 @@ package com.example.photodrop.ui.drive
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,7 +34,7 @@ import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextGedaempft
 import com.example.photodrop.ui.theme.TextHell
 
-// Stateful: Verbindet den ViewModel mit dem UI.
+// Stateful: Verbindet den ViewModel mit dem Drive-UI.
 @Composable
 fun DriveScreen(
     viewModel: DriveViewModel = viewModel(),
@@ -49,7 +55,7 @@ fun DriveScreen(
     )
 }
 
-// Stateless: Zeigt den aktuellen Drive-Verbindungsstatus.
+// Stateless: Zeigt den aktuellen Drive-Verbindungsstatus mit AnimatedContent-Übergängen.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DriveInhalt(
@@ -70,7 +76,9 @@ fun DriveInhalt(
                     }
                 },
                 actions = {
-                    if (zustand is DriveZustand.Verbunden) {
+                    val istVerbunden = zustand is DriveZustand.Verbunden
+                            || zustand is DriveZustand.InhaltGeladen
+                    if (istVerbunden) {
                         IconButton(onClick = onAbmelden) {
                             Icon(Icons.AutoMirrored.Filled.Logout, "Abmelden", tint = TextGedaempft)
                         }
@@ -87,17 +95,43 @@ fun DriveInhalt(
             modifier = Modifier.fillMaxSize().padding(innenAbstand),
             contentAlignment = Alignment.Center
         ) {
-            when (zustand) {
-                is DriveZustand.NichtVerbunden -> NichtVerbundenInhalt(onVerbinden)
-                is DriveZustand.Verbindet -> LadeInhalt()
-                is DriveZustand.OrdnerBenennen -> OrdnerBenennenInhalt(
-                    kontoName = zustand.kontoName,
-                    onBestaetigen = onOrdnerBestaetigen
+            AnimatedContent(
+                targetState = zustand,
+                transitionSpec = {
+                    (fadeIn() + slideInVertically { it / 4 }) togetherWith
+                            (fadeOut() + slideOutVertically { -it / 4 })
+                },
+                label = "DriveZustandAnimation"
+            ) { aktuellerZustand ->
+                ZustandInhaltAuswaehlen(
+                    zustand = aktuellerZustand,
+                    onVerbinden = onVerbinden,
+                    onOrdnerBestaetigen = onOrdnerBestaetigen,
+                    onZuruecksetzen = onZuruecksetzen
                 )
-                is DriveZustand.Verbunden -> VerbundenInhalt(zustand)
-                is DriveZustand.Fehler -> FehlerInhalt(zustand.meldung, onZuruecksetzen)
             }
         }
+    }
+}
+
+// Wählt den passenden Inhalt für den aktuellen Zustand aus.
+@Composable
+private fun ZustandInhaltAuswaehlen(
+    zustand: DriveZustand,
+    onVerbinden: () -> Unit,
+    onOrdnerBestaetigen: (String) -> Unit,
+    onZuruecksetzen: () -> Unit
+) {
+    when (zustand) {
+        is DriveZustand.NichtVerbunden -> NichtVerbundenInhalt(onVerbinden)
+        is DriveZustand.Verbindet -> LadeInhalt()
+        is DriveZustand.OrdnerBenennen -> OrdnerBenennenInhalt(
+            kontoName = zustand.kontoName,
+            onBestaetigen = onOrdnerBestaetigen
+        )
+        is DriveZustand.Verbunden -> VerbundenAnimiertInhalt(zustand)
+        is DriveZustand.InhaltGeladen -> OrdnerInhaltInhalt(zustand)
+        is DriveZustand.Fehler -> FehlerInhalt(zustand.meldung, onZuruecksetzen)
     }
 }
 
@@ -126,6 +160,22 @@ private fun DriveInhaltOrdnerBenennenVorschau() {
 private fun DriveInhaltVerbundenVorschau() {
     PhotoDropTheme {
         DriveInhalt(DriveZustand.Verbunden("max@gmail.com", "abc123"), {}, {}, {})
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Inhalt geladen")
+@Composable
+private fun DriveInhaltGeladenVorschau() {
+    PhotoDropTheme {
+        DriveInhalt(
+            DriveZustand.InhaltGeladen(
+                "max@gmail.com", "abc123",
+                listOf(
+                    DriveOrdnerDatei("1", "foto_001.jpg", "image/jpeg", 1_200_000, "2026-03-21"),
+                    DriveOrdnerDatei("2", "Sicherung", "application/vnd.google-apps.folder", null, null)
+                )
+            ), {}, {}, {}
+        )
     }
 }
 

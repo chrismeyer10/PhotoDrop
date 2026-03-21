@@ -63,4 +63,34 @@ object DriveVerbindung {
     suspend fun ordnerSicherstellen(token: String, ordnerName: String): String? {
         return ordnerSuchen(token, ordnerName) ?: ordnerErstellen(token, ordnerName)
     }
+
+    // Lädt den Inhalt eines Drive-Ordners und gibt die Dateiliste zurück.
+    // Gibt eine leere Liste zurück wenn der Ordner leer ist oder ein Fehler auftritt.
+    suspend fun ordnerInhaltLaden(token: String, ordnerId: String): List<DriveOrdnerDatei> =
+        withContext(Dispatchers.IO) {
+            try {
+                val abfrage = URLEncoder.encode(
+                    "'$ordnerId' in parents and trashed=false", "UTF-8"
+                )
+                val felder = "files(id,name,mimeType,size,modifiedTime)"
+                val url = URL("$DRIVE_API/files?q=$abfrage&fields=$felder")
+                val verbindung = url.openConnection() as HttpURLConnection
+                verbindung.setRequestProperty("Authorization", "Bearer $token")
+
+                val antwort = verbindung.inputStream.bufferedReader().readText()
+                val dateiArray = org.json.JSONObject(antwort).getJSONArray("files")
+                (0 until dateiArray.length()).map { i ->
+                    val obj = dateiArray.getJSONObject(i)
+                    DriveOrdnerDatei(
+                        id = obj.getString("id"),
+                        name = obj.getString("name"),
+                        mimeType = obj.getString("mimeType"),
+                        groesse = if (obj.has("size")) obj.getLong("size") else null,
+                        geaendertAm = if (obj.has("modifiedTime")) obj.getString("modifiedTime") else null
+                    )
+                }
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
 }
