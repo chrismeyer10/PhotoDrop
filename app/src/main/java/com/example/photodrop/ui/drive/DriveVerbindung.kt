@@ -14,6 +14,30 @@ object DriveVerbindung {
     private const val DRIVE_API = "https://www.googleapis.com/drive/v3"
     private const val ORDNER_TYP = "application/vnd.google-apps.folder"
 
+    // Lädt alle Ordner im Drive-Root des Nutzers, sortiert nach Änderungsdatum.
+    // Gibt eine leere Liste zurück wenn kein Zugriff möglich ist.
+    suspend fun ordnerListeLaden(token: String): List<DriveOrdner> =
+        withContext(Dispatchers.IO) {
+            try {
+                val abfrage = URLEncoder.encode(
+                    "mimeType='$ORDNER_TYP' and 'root' in parents and trashed=false",
+                    "UTF-8"
+                )
+                val url = URL("$DRIVE_API/files?q=$abfrage&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc")
+                val verbindung = url.openConnection() as HttpURLConnection
+                verbindung.setRequestProperty("Authorization", "Bearer $token")
+
+                val antwort = verbindung.inputStream.bufferedReader().readText()
+                val dateiArray = JSONObject(antwort).getJSONArray("files")
+                (0 until dateiArray.length()).map { i ->
+                    val obj = dateiArray.getJSONObject(i)
+                    DriveOrdner(id = obj.getString("id"), name = obj.getString("name"))
+                }
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+
     // Sucht nach einem Ordner mit dem gegebenen Namen in Drive.
     // Gibt die Ordner-ID zurück oder null wenn kein Ordner existiert.
     suspend fun ordnerSuchen(token: String, ordnerName: String): String? =

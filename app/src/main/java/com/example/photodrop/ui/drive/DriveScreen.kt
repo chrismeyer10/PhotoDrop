@@ -48,6 +48,8 @@ fun DriveScreen(
     DriveInhalt(
         zustand = zustand,
         onVerbinden = { anmeldeLauncher.launch(viewModel.anmeldeIntentErstellen()) },
+        onOrdnerAuswaehlen = viewModel::ordnerAuswaehlen,
+        onNeuenOrdnerErstellen = viewModel::neuenOrdnerErstellen,
         onOrdnerBestaetigen = viewModel::ordnerBestaetigen,
         onZuruecksetzen = viewModel::zuruecksetzen,
         onAbmelden = viewModel::abmelden,
@@ -61,6 +63,8 @@ fun DriveScreen(
 fun DriveInhalt(
     zustand: DriveZustand,
     onVerbinden: () -> Unit,
+    onOrdnerAuswaehlen: (DriveOrdner) -> Unit = {},
+    onNeuenOrdnerErstellen: () -> Unit = {},
     onOrdnerBestaetigen: (String) -> Unit = {},
     onZuruecksetzen: () -> Unit,
     onAbmelden: () -> Unit = {},
@@ -106,6 +110,8 @@ fun DriveInhalt(
                 ZustandInhaltAuswaehlen(
                     zustand = aktuellerZustand,
                     onVerbinden = onVerbinden,
+                    onOrdnerAuswaehlen = onOrdnerAuswaehlen,
+                    onNeuenOrdnerErstellen = onNeuenOrdnerErstellen,
                     onOrdnerBestaetigen = onOrdnerBestaetigen,
                     onZuruecksetzen = onZuruecksetzen
                 )
@@ -119,12 +125,20 @@ fun DriveInhalt(
 private fun ZustandInhaltAuswaehlen(
     zustand: DriveZustand,
     onVerbinden: () -> Unit,
+    onOrdnerAuswaehlen: (DriveOrdner) -> Unit,
+    onNeuenOrdnerErstellen: () -> Unit,
     onOrdnerBestaetigen: (String) -> Unit,
     onZuruecksetzen: () -> Unit
 ) {
     when (zustand) {
         is DriveZustand.NichtVerbunden -> NichtVerbundenInhalt(onVerbinden)
         is DriveZustand.Verbindet -> LadeInhalt()
+        is DriveZustand.OrdnerLaden -> LadeInhalt()
+        is DriveZustand.OrdnerAuswaehlen -> OrdnerAuswaehlenInhalt(
+            zustand = zustand,
+            onAuswaehlen = onOrdnerAuswaehlen,
+            onNeuErstellen = onNeuenOrdnerErstellen
+        )
         is DriveZustand.OrdnerBenennen -> OrdnerBenennenInhalt(
             kontoName = zustand.kontoName,
             onBestaetigen = onOrdnerBestaetigen
@@ -138,20 +152,42 @@ private fun ZustandInhaltAuswaehlen(
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Nicht verbunden")
 @Composable
 private fun DriveInhaltNichtVerbundenVorschau() {
-    PhotoDropTheme { DriveInhalt(DriveZustand.NichtVerbunden, {}, {}, {}) }
+    PhotoDropTheme { DriveInhalt(DriveZustand.NichtVerbunden, {}, {}, {}, {}, {}) }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Verbindet")
 @Composable
 private fun DriveInhaltVerbindetVorschau() {
-    PhotoDropTheme { DriveInhalt(DriveZustand.Verbindet, {}, {}, {}) }
+    PhotoDropTheme { DriveInhalt(DriveZustand.Verbindet, {}, {}, {}, {}, {}) }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Ordner laden")
+@Composable
+private fun DriveInhaltOrdnerLadenVorschau() {
+    PhotoDropTheme {
+        DriveInhalt(DriveZustand.OrdnerLaden("max@gmail.com", "token"), {}, {}, {}, {}, {})
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Ordner auswählen")
+@Composable
+private fun DriveInhaltOrdnerAuswaehlenVorschau() {
+    val gespeichert = DriveOrdner("id1", "PhotoDrop")
+    PhotoDropTheme {
+        DriveInhalt(
+            DriveZustand.OrdnerAuswaehlen(
+                "max@gmail.com", "token",
+                listOf(gespeichert, DriveOrdner("id2", "Dokumente")), gespeichert
+            ), {}, {}, {}, {}, {}
+        )
+    }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Ordner benennen")
 @Composable
 private fun DriveInhaltOrdnerBenennenVorschau() {
     PhotoDropTheme {
-        DriveInhalt(DriveZustand.OrdnerBenennen("max@gmail.com", "token"), {}, {}, {})
+        DriveInhalt(DriveZustand.OrdnerBenennen("max@gmail.com", "token"), {}, {}, {}, {}, {})
     }
 }
 
@@ -159,7 +195,7 @@ private fun DriveInhaltOrdnerBenennenVorschau() {
 @Composable
 private fun DriveInhaltVerbundenVorschau() {
     PhotoDropTheme {
-        DriveInhalt(DriveZustand.Verbunden("max@gmail.com", "abc123"), {}, {}, {})
+        DriveInhalt(DriveZustand.Verbunden("max@gmail.com", "abc123"), {}, {}, {}, {}, {})
     }
 }
 
@@ -174,7 +210,7 @@ private fun DriveInhaltGeladenVorschau() {
                     DriveOrdnerDatei("1", "foto_001.jpg", "image/jpeg", 1_200_000, "2026-03-21"),
                     DriveOrdnerDatei("2", "Sicherung", "application/vnd.google-apps.folder", null, null)
                 )
-            ), {}, {}, {}
+            ), {}, {}, {}, {}, {}
         )
     }
 }
@@ -183,6 +219,6 @@ private fun DriveInhaltGeladenVorschau() {
 @Composable
 private fun DriveInhaltFehlerVorschau() {
     PhotoDropTheme {
-        DriveInhalt(DriveZustand.Fehler("Anmeldung fehlgeschlagen: 12500"), {}, {}, {})
+        DriveInhalt(DriveZustand.Fehler("Anmeldung fehlgeschlagen: 12500"), {}, {}, {}, {}, {})
     }
 }
