@@ -24,6 +24,8 @@ import com.example.photodrop.ui.theme.AkzentFarbe
 import com.example.photodrop.ui.theme.AppHintergrund
 import com.example.photodrop.ui.theme.PhotoDropTheme
 
+// Stateful: Verbindet den ViewModel mit dem UI.
+// Holt die Fotoliste und die Kamera-Aktion und gibt sie nach unten weiter.
 @Composable
 fun FotoAufnahmeScreen(viewModel: FotoViewModel = viewModel()) {
     val fotos by viewModel.fotos.collectAsState()
@@ -31,6 +33,8 @@ fun FotoAufnahmeScreen(viewModel: FotoViewModel = viewModel()) {
     FotoAufnahmeInhalt(fotos = fotos, onFotoAufnehmen = fotoAktion)
 }
 
+// Stateless: Zeigt die Fotoliste und den Kamera-Button.
+// Weiß nichts vom ViewModel — bekommt alles was es braucht von außen.
 @Composable
 fun FotoAufnahmeInhalt(fotos: List<Uri>, onFotoAufnehmen: () -> Unit) {
     Box(
@@ -53,6 +57,8 @@ fun FotoAufnahmeInhalt(fotos: List<Uri>, onFotoAufnehmen: () -> Unit) {
     }
 }
 
+// Runder Kamera-Button unten in der Mitte.
+// Wenn man drückt, wird onFotoAufnehmen ausgelöst.
 @Composable
 private fun KameraAusloeser(onClick: () -> Unit, modifier: Modifier = Modifier) {
     FloatingActionButton(

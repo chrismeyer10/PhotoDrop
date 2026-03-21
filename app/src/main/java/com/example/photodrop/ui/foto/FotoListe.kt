@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextGedaempft
 
+// Zeigt alle Fotos in einem 2-spaltigen Raster.
+// Ist die Liste leer, erscheint stattdessen ein Hinweis-Screen.
 @Composable
 fun FotoListe(fotos: List<Uri>, modifier: Modifier = Modifier) {
     if (fotos.isEmpty()) {
@@ -41,6 +43,8 @@ fun FotoListe(fotos: List<Uri>, modifier: Modifier = Modifier) {
     }
 }
 
+// Wird angezeigt wenn noch keine Fotos vorhanden sind.
+// Zeigt ein Kamera-Symbol und einen kurzen Erklärungstext.
 @Composable
 private fun Leerzustand(modifier: Modifier = Modifier) {
     Column(
