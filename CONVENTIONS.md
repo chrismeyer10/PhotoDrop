@@ -74,6 +74,25 @@ fun fotoVerarbeiten(uri: String): Ergebnis {
 
 ---
 
+## Composable Previews
+
+- **Jedes öffentliche `@Composable` bekommt eine `@Preview`-Funktion**
+- Preview-Funktionen sind `private` und enden auf `Vorschau`
+- Immer in `PhotoDropTheme` wrappen
+- Immer `backgroundColor = 0xFF0A0A0A` setzen (Dark Theme)
+- Bei mehreren Zuständen: mehrere Previews mit `name = "..."` anlegen
+
+**Richtig:**
+```kotlin
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Leerzustand")
+@Composable
+private fun MeineKomponenteVorschau() {
+    PhotoDropTheme {
+        MeineKomponente()
+    }
+}
+```
+
 ## Weitere Konventionen
 
 > Neue Einträge hier einfügen wenn sie während einer Aufgabe erkannt werden.

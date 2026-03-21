@@ -19,7 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextGedaempft
 
 @Composable
@@ -56,5 +58,24 @@ private fun Leerzustand(modifier: Modifier = Modifier) {
         Text("Noch keine Fotos", color = TextGedaempft, style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(8.dp))
         Text("Tippe unten um loszulegen", color = TextGedaempft.copy(alpha = 0.5f), style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Leerzustand")
+@Composable
+private fun FotoListeLeerVorschau() {
+    PhotoDropTheme {
+        FotoListe(fotos = emptyList(), modifier = Modifier.fillMaxSize())
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Mit Fotos")
+@Composable
+private fun FotoListeMitFotosVorschau() {
+    PhotoDropTheme {
+        FotoListe(
+            fotos = List(4) { Uri.EMPTY },
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }

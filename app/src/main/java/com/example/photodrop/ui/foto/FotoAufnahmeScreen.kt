@@ -16,10 +16,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.photodrop.ui.theme.AkzentFarbe
 import com.example.photodrop.ui.theme.AppHintergrund
+import com.example.photodrop.ui.theme.PhotoDropTheme
 
 @Composable
 fun FotoAufnahmeScreen(viewModel: FotoViewModel = viewModel()) {
@@ -60,5 +62,47 @@ private fun KameraAusloeser(onClick: () -> Unit, modifier: Modifier = Modifier) 
             contentDescription = "Foto aufnehmen",
             modifier = Modifier.size(34.dp)
         )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A)
+@Composable
+private fun FotoAufnahmeScreenLeerzustandVorschau() {
+    PhotoDropTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(AppHintergrund)
+        ) {
+            FotoListe(
+                fotos = emptyList(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 100.dp)
+            )
+            KameraAusloeser(
+                onClick = {},
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 36.dp)
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A)
+@Composable
+private fun KameraAusloeserVorschau() {
+    PhotoDropTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(AppHintergrund)
+        ) {
+            KameraAusloeser(
+                onClick = {},
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
     }
 }
