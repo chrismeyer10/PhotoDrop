@@ -51,6 +51,7 @@ android {
             excludes += "META-INF/LICENSE.txt"
             excludes += "META-INF/NOTICE"
             excludes += "META-INF/NOTICE.txt"
+            excludes += "META-INF/INDEX.LIST"
         }
     }
 }
@@ -69,6 +70,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.coil.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.play.services.auth)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
