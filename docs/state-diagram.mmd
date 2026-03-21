@@ -1,0 +1,38 @@
+%% PhotoDrop — State Diagram
+%% Pflege: Bei jeder Aufgabe aktualisieren wenn sich Zustände, Screens oder Flows ändern.
+%% Zeigt: App-Navigation, Screen-Zustände, DriveViewModel-Zustände, AgentService-Zustände.
+
+stateDiagram-v2
+    [*] --> FotoAufnahmeScreen
+
+    FotoAufnahmeScreen --> DriveScreen : Drawer
+    FotoAufnahmeScreen --> DriveScreen : Ordner fehlt
+    DriveScreen --> FotoAufnahmeScreen : Drawer
+
+    state FotoAufnahmeScreen {
+        [*] --> FotoListe
+        FotoListe --> OrdnerDialog : Kamera ohne Ordner
+        FotoListe --> KameraOffen : Kamera mit Ordner
+        OrdnerDialog --> FotoListe : Abbrechen
+        KameraOffen --> FotoListe : Foto gespeichert
+    }
+
+    state DriveScreen {
+        [*] --> NichtVerbunden
+        NichtVerbunden --> Verbindet : Anmelden
+        Verbindet --> OrdnerBenennen : Kein Ordner gespeichert
+        Verbindet --> Verbunden : Ordner vorhanden
+        Verbindet --> DriveFehler : Fehler
+        OrdnerBenennen --> Verbindet : Bestaetigen
+        DriveFehler --> NichtVerbunden : Zuruecksetzen
+        Verbunden --> NichtVerbunden : Abmelden
+    }
+
+    state AgentService {
+        [*] --> Bereit
+        Bereit --> Laeuft : run()
+        Laeuft --> Erfolgreich : Success
+        Laeuft --> AgentFehler : Error
+        Erfolgreich --> Bereit
+        AgentFehler --> Bereit
+    }

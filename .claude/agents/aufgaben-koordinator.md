@@ -66,19 +66,33 @@ Aufrufen wenn: neue Dateien entstanden | neue Packages angelegt | Datei stark ge
 Er prüft Paketstruktur, Dateigröße, @Preview-Vollständigkeit
 ```
 
-### 7. Committen
+### 7. State Diagram aktualisieren → docs/state-diagram.mmd
+```
+Prüfen ob die Aufgabe etwas an Zuständen, Screens oder Flows geändert hat.
+Wenn ja: docs/state-diagram.mmd anpassen.
+
+Wann aktualisieren:
+- Neuer Screen oder neue Navigation
+- Neuer Zustand in einem ViewModel (z.B. neues sealed class)
+- Neuer Service mit eigenem Zustandsfluss
+- Bestehender Zustand umbenannt oder entfernt
+
+Format: Mermaid stateDiagram-v2 — Vorlage in docs/state-diagram.mmd anschauen.
+```
+
+### 8. Committen
 ```bash
 git add <nur geänderte Dateien — niemals git add .>
 git commit -m "<typ>: <kurze deutsche Beschreibung>"
 ```
 
-### 8. PR erstellen und mergen → Skill: /github-pr
+### 9. PR erstellen und mergen → Skill: /github-pr
 ```
 Branch pushen: git push -u origin <branch>
 Dann /github-pr aufrufen — er erstellt und mergt den PR automatisch
 ```
 
-### 9. main synchronisieren
+### 10. main synchronisieren
 ```bash
 git checkout main && git pull
 ```

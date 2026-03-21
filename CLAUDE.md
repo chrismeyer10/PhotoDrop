@@ -14,8 +14,9 @@ Der Koordinator führt diese Schritte aus:
 4. **`build-check` Agent** — `./gradlew compileDebugKotlin` muss grün sein
 5. **`code-cleanup` Agent** — tote Imports, Duplikate, veralteter Code entfernen
 6. **`struktur-check` Agent** — wenn neue Dateien entstanden sind (prüft auch @Preview)
-7. Committen und PR erstellen/mergen via `/github-pr` Skill
-8. `main` synchronisieren
+7. **`docs/state-diagram.mmd` aktualisieren** — wenn Zustände, Screens oder Flows geändert wurden
+8. Committen und PR erstellen/mergen via `/github-pr` Skill
+9. `main` synchronisieren
 
 ## Git-Workflow
 
@@ -69,6 +70,18 @@ Skills sind wiederverwendbare Muster für häufige Aufgaben.
 | `/neuer-screen` | Neuen Feature-Screen nach Standardmuster anlegen | Wenn ein neuer Screen gebaut wird |
 | `/compose-preview` | Fehlende @Preview-Annotationen hinzufügen | Wenn struktur-check Previews bemängelt |
 | `/photo-skill` | Foto nach Aufnahme verarbeiten und speichern | Wenn ein Foto verarbeitet werden soll |
+| `/hinweis-text` | Hinweistext für den Nutzer schreiben (kurz, deutsch, kontextgerecht) | Wenn ein Hinweistext in die UI eingebaut werden soll |
+
+## State Diagram (`docs/state-diagram.mmd`)
+
+Zeigt alle App-Zustände: Navigation, Screen-States, DriveViewModel, AgentService.
+
+**Pflege-Regel:** Bei jeder Aufgabe prüfen ob das Diagram noch stimmt und ggf. aktualisieren.
+Wann aktualisieren:
+- Neuer Screen hinzugefügt
+- Neuer Zustand in einem ViewModel
+- Navigation geändert
+- Neuer Service mit eigenem Zustandsfluss
 
 ## Android-Infrastruktur
 
