@@ -2,16 +2,19 @@
 
 ## Pflicht bei jeder Aufgabe
 
-1. **Feature-Branch erstellen** — NIEMALS direkt auf `main` arbeiten
+> **Den `aufgaben-koordinator` Agent aufrufen** — er übernimmt den gesamten Workflow automatisch.
+
+Der Koordinator führt diese Schritte aus:
+
+1. `CONVENTIONS.md` und `CLAUDE.md` lesen
+2. **Feature-Branch erstellen** — NIEMALS direkt auf `main` arbeiten
    - Branch-Name: `feat/`, `fix/`, `docs/`, `refactor/` + kurzer beschreibender Name
-   - Beispiele: `feat/foto-galerie`, `fix/kamera-erlaubnis`, `docs/kommentare`
-   - Nach Abschluss: PR erstellen und mergen
-2. **`CONVENTIONS.md` lesen** und den gesamten Code danach ausrichten
-3. **Neue Conventions erkennen** → sofort in `CONVENTIONS.md` unter "Weitere Konventionen" eintragen
-4. **`build-check` Agent aufrufen** BEVOR ein Commit erstellt wird — `./gradlew compileDebugKotlin` muss fehlerfrei durchlaufen
-5. **`code-cleanup` Agent aufrufen** nachdem die Aufgabe abgeschlossen ist *(Kotlin-Code: tote Imports, Duplikate, veraltete Abhängigkeiten)*
-6. **`struktur-check` Agent aufrufen** wenn neue Dateien entstehen oder die Struktur wächst — prüft ob alles sinnvoll aufgeteilt ist
-7. **`.gitignore` prüfen** wenn neue Dateien als "Unversioned" auftauchen — IDE-Dateien (.idea/) und Build-Artefakte gehören nie ins Repo
+3. Aufgabe umsetzen (Conventions einhalten)
+4. **`build-check` Agent** — `./gradlew compileDebugKotlin` muss grün sein
+5. **`code-cleanup` Agent** — tote Imports, Duplikate entfernen
+6. **`struktur-check` Agent** — wenn neue Dateien entstanden sind
+7. Committen, PR erstellen und mergen
+8. `main` synchronisieren
 
 ## Git-Workflow
 
@@ -46,6 +49,7 @@ Jeder Agent hat klar definierte Tools und einen eigenen Fokus.
 
 | Agent | Datei | Zweck |
 |-------|-------|-------|
+| `aufgaben-koordinator` | `aufgaben-koordinator.md` | **Master-Agent** — Einstiegspunkt, orchestriert den kompletten Workflow |
 | `build-check` | `build-check.md` | Führt `compileDebugKotlin` aus und meldet/repariert Fehler |
 | `code-cleanup` | `code-cleanup.md` | Findet und löscht überflüssigen/redundanten Code |
 | `struktur-check` | `struktur-check.md` | Überwacht Datei-/Paketstruktur, erzwingt kleine Komponenten |
