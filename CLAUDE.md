@@ -34,6 +34,12 @@ git push -u origin feat/mein-feature
 
 **Wichtig:** Vor dem Branch-Anlegen immer `git pull` auf main.
 
+## Wissensdatenbank
+
+`WISSEN.md` enthält den aktuellen Projektstatus (Feature-Übersicht, Datei-Karte, TODOs).
+Wird vom `wissens-agent` erstellt und aktualisiert. Der `aufgaben-koordinator` liest
+sie automatisch am Anfang jeder Aufgabe.
+
 ## Projektübersicht
 
 PhotoDrop ist eine Android-App (Kotlin + Jetpack Compose) zum Aufnehmen von Fotos
@@ -47,6 +53,7 @@ Agents sind spezialisierte Claude-Instanzen für komplexe, mehrstufige Aufgaben.
 | Agent | Zweck | Wann aufrufen |
 |-------|-------|---------------|
 | `aufgaben-koordinator` | **Master-Agent** — orchestriert den Workflow | Bei jeder neuen Aufgabe zuerst |
+| `wissens-agent` | Scannt Projekt und aktualisiert `WISSEN.md` | Nach größeren Änderungen oder wenn WISSEN.md veraltet ist |
 | `build-check` | `compileDebugKotlin` ausführen und Fehler reparieren | Nach jeder Code-Änderung, vor Commit |
 | `code-cleanup` | Tote Imports, Duplikate, veralteten Code entfernen | Nach Implementierung, vor Struktur-Check |
 | `struktur-check` | Paketstruktur, Dateigröße, @Preview-Vollständigkeit prüfen | Nach Aufgaben mit neuen Dateien |
