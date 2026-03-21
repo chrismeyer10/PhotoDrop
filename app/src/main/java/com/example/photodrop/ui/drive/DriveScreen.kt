@@ -32,12 +32,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.photodrop.ui.theme.AkzentFarbe
 import com.example.photodrop.ui.theme.AppHintergrund
 import com.example.photodrop.ui.theme.OberflächenFarbe
 import com.example.photodrop.ui.theme.TextGedaempft
+import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextHell
 
 // Stateful: Verbindet den ViewModel mit dem UI.
@@ -202,5 +204,56 @@ private fun FehlerInhalt(meldung: String, onZuruecksetzen: () -> Unit) {
         TextButton(onClick = onZuruecksetzen) {
             Text("Erneut versuchen", color = AkzentFarbe)
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Nicht verbunden")
+@Composable
+private fun DriveInhaltNichtVerbundenVorschau() {
+    PhotoDropTheme {
+        DriveInhalt(
+            zustand = DriveZustand.NichtVerbunden,
+            onVerbinden = {},
+            onZuruecksetzen = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Verbindet")
+@Composable
+private fun DriveInhaltVerbindetVorschau() {
+    PhotoDropTheme {
+        DriveInhalt(
+            zustand = DriveZustand.Verbindet,
+            onVerbinden = {},
+            onZuruecksetzen = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Verbunden")
+@Composable
+private fun DriveInhaltVerbundenVorschau() {
+    PhotoDropTheme {
+        DriveInhalt(
+            zustand = DriveZustand.Verbunden(
+                kontoName = "max@gmail.com",
+                ordnerId = "abc123"
+            ),
+            onVerbinden = {},
+            onZuruecksetzen = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Fehler")
+@Composable
+private fun DriveInhaltFehlerVorschau() {
+    PhotoDropTheme {
+        DriveInhalt(
+            zustand = DriveZustand.Fehler("Anmeldung fehlgeschlagen: 12500"),
+            onVerbinden = {},
+            onZuruecksetzen = {}
+        )
     }
 }

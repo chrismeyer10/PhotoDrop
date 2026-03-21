@@ -3,106 +3,116 @@
 ## Pflicht bei jeder Aufgabe
 
 > **Den `aufgaben-koordinator` Agent aufrufen** — er übernimmt den gesamten Workflow automatisch.
+> **NIEMALS direkt implementieren ohne den Koordinator zu starten.**
 
 Der Koordinator führt diese Schritte aus:
 
 1. `CONVENTIONS.md` und `CLAUDE.md` lesen
 2. **Feature-Branch erstellen** — NIEMALS direkt auf `main` arbeiten
-   - Branch-Name: `feat/`, `fix/`, `docs/`, `refactor/` + kurzer beschreibender Name
-3. Aufgabe umsetzen (Conventions einhalten)
+   - Branch-Name: `feat/`, `fix/`, `docs/`, `refactor/`, `chore/` + kurzer beschreibender Name
+3. Aufgabe umsetzen — Conventions einhalten (deutsche Bezeichner, @Preview, ~100 Zeilen max)
 4. **`build-check` Agent** — `./gradlew compileDebugKotlin` muss grün sein
-5. **`code-cleanup` Agent** — tote Imports, Duplikate entfernen
-6. **`struktur-check` Agent** — wenn neue Dateien entstanden sind
-7. Committen, PR erstellen und mergen
+5. **`code-cleanup` Agent** — tote Imports, Duplikate, veralteter Code entfernen
+6. **`struktur-check` Agent** — wenn neue Dateien entstanden sind (prüft auch @Preview)
+7. Committen und PR erstellen/mergen via `/github-pr` Skill
 8. `main` synchronisieren
 
 ## Git-Workflow
 
-```
+```bash
 # 1. Branch anlegen
 git checkout main && git pull
 git checkout -b feat/mein-feature
 
-# 2. Änderungen committen
-git add <dateien>
-git commit -m "feat: kurze Beschreibung"
+# 2. Änderungen committen (immer gezielt — nie git add .)
+git add <spezifische Dateien>
+git commit -m "feat: kurze deutsche Beschreibung"
 
-# 3. Push + PR
+# 3. Push + PR (via /github-pr Skill)
 git push -u origin feat/mein-feature
-# → PR über GitHub API (Node.js) erstellen und mergen
 ```
 
-**Wichtig:** Vor dem Branch-Anlegen immer `git pull` auf main — so gibt es keine Konflikte.
+**Wichtig:** Vor dem Branch-Anlegen immer `git pull` auf main.
 
 ## Projektübersicht
 
-> **TODO**: Beschreibe hier was PhotoDrop ist und kann.
+PhotoDrop ist eine Android-App (Kotlin + Jetpack Compose) zum Aufnehmen von Fotos
+und zur automatischen Synchronisation mit Google Drive.
+Die App verwendet Claude-Agents und -Skills für KI-gestützte Funktionen.
 
-Android-App (Kotlin + Jetpack Compose), die Claude-Agents und -Skills nutzt.
-
-## Architektur
-
-### Agents (`/.claude/agents/`)
+## Agents (`/.claude/agents/`)
 
 Agents sind spezialisierte Claude-Instanzen für komplexe, mehrstufige Aufgaben.
-Jeder Agent hat klar definierte Tools und einen eigenen Fokus.
 
-| Agent | Datei | Zweck |
-|-------|-------|-------|
-| `aufgaben-koordinator` | `aufgaben-koordinator.md` | **Master-Agent** — Einstiegspunkt, orchestriert den kompletten Workflow |
-| `build-check` | `build-check.md` | Führt `compileDebugKotlin` aus und meldet/repariert Fehler |
-| `code-cleanup` | `code-cleanup.md` | Findet und löscht überflüssigen/redundanten Code |
-| `struktur-check` | `struktur-check.md` | Überwacht Datei-/Paketstruktur, erzwingt kleine Komponenten |
-| `figma-agent` | `figma-agent.md` | Ruft Figma-Designs ab und wandelt sie in Compose-Code um |
-| *Placeholder* | `photo-agent.md` | TODO |
+| Agent | Zweck | Wann aufrufen |
+|-------|-------|---------------|
+| `aufgaben-koordinator` | **Master-Agent** — orchestriert den Workflow | Bei jeder neuen Aufgabe zuerst |
+| `build-check` | `compileDebugKotlin` ausführen und Fehler reparieren | Nach jeder Code-Änderung, vor Commit |
+| `code-cleanup` | Tote Imports, Duplikate, veralteten Code entfernen | Nach Implementierung, vor Struktur-Check |
+| `struktur-check` | Paketstruktur, Dateigröße, @Preview-Vollständigkeit prüfen | Nach Aufgaben mit neuen Dateien |
+| `figma-agent` | Figma-Designs abrufen und in Compose-Code umwandeln | Wenn ein Design aus Figma implementiert wird |
+
+## Skills (`/.claude/skills/`)
+
+Skills sind wiederverwendbare Muster für häufige Aufgaben.
+
+| Skill | Zweck | Wann aufrufen |
+|-------|-------|---------------|
+| `/github-pr` | PR erstellen und mergen via GitHub API | Nach `git push` am Ende jeder Aufgabe |
+| `/neuer-screen` | Neuen Feature-Screen nach Standardmuster anlegen | Wenn ein neuer Screen gebaut wird |
+| `/compose-preview` | Fehlende @Preview-Annotationen hinzufügen | Wenn struktur-check Previews bemängelt |
+| `/photo-skill` | Foto nach Aufnahme verarbeiten und speichern | Wenn ein Foto verarbeitet werden soll |
+
+## Android-Infrastruktur
+
+```
+app/src/main/java/com/example/photodrop/
+├── agent/
+│   └── AgentService.kt            ← Führt Agents mit Skills als Tools aus
+├── skills/
+│   ├── Skill.kt                   ← Basis-Typ (typealias für Supplier<String>)
+│   ├── SkillRegistry.kt           ← Registriert alle aktiven Skills
+│   └── GetPhotoInfoSkill.kt       ← Foto-Info-Skill
+└── ui/
+    ├── theme/                     ← Farben, Typografie, Theme
+    ├── navigation/                ← AppNavigation, NavigationsLeiste, NavigationsZiel
+    ├── foto/                      ← Foto-Aufnahme-Feature
+    └── drive/                     ← Google Drive Verbindungs-Feature
+```
+
+## Neuen Agent anlegen
+
+1. Datei in `.claude/agents/[name].md` erstellen
+2. Frontmatter: `name`, `description` (klar formuliert — beschreibt WANN aufzurufen), `model`, `tools`
+3. System-Prompt: konkreter Ablauf mit Schritten, nicht nur Prinzipien
+4. In `CLAUDE.md` Tabelle eintragen (Spalten: Agent, Zweck, Wann aufrufen)
+
+## Neuen Skill anlegen
+
+1. Datei in `.claude/skills/[name].md` erstellen
+2. `description` klar formulieren: wann wird dieser Skill verwendet?
+3. Konkrete Vorlage/Muster dokumentieren
+4. In `CLAUDE.md` Tabelle eintragen
+5. Wenn Kotlin-Implementierung nötig: `app/.../skills/[Name]Skill.kt` + `SkillRegistry.kt`
+
+## Konventions-Pflicht
+
+Jede Implementierung hält `CONVENTIONS.md` ein. Die wichtigsten Regeln:
+- **Deutsche Bezeichner** für alle selbst geschriebenen Namen
+- **@Preview** für jedes öffentliche Composable (Pflicht — wird vom struktur-check geprüft)
+- **Stateful/Stateless-Trennung**: `XyzScreen` + `XyzInhalt`
+- **~100 Zeilen** pro Datei — größere Dateien aufteilen
+- **Kurze deutsche Kommentare** über Klassen und Funktionen
+
+## Entwicklungs-Konventionen
+
+- Modell: `claude-opus-4-6`
+- API-Key: in `local.properties` → `ANTHROPIC_API_KEY=...` (niemals committen)
+- Async: Kotlin Coroutines (`Dispatchers.IO` für API-Calls und Dateioperationen)
+- Skill-Felder: `@JvmField` damit Jackson die Properties direkt lesen kann
 
 ## MCP-Server
 
 | Server | Status | Account |
 |--------|--------|---------|
 | Figma | ✅ Verbunden | christian.meyer19@gmail.com |
-
-### Skills (`/.claude/skills/`)
-
-Skills sind wiederverwendbare, aufrufbare Aktionen (`/skill-name`).
-Sie kapseln wiederkehrende Aufgaben und Standards.
-
-| Skill | Datei | Aufruf |
-|-------|-------|--------|
-| *Placeholder* | `photo-skill.md` | `/photo-skill` |
-
-### Android-Infrastruktur
-
-```
-app/src/main/java/com/example/photodrop/
-├── agent/
-│   └── AgentService.kt       ← Führt Agents mit Skills als Tools aus
-├── skills/
-│   ├── Skill.kt              ← Basis-Typ (typealias für Supplier<String>)
-│   ├── SkillRegistry.kt      ← Registriert alle aktiven Skills
-│   └── GetPhotoInfoSkill.kt  ← Beispiel-Skill (Placeholder)
-└── ui/
-    ├── theme/                ← Farben, Typografie, Theme
-    └── foto/                 ← Foto-Aufnahme-Feature
-```
-
-## Neuen Agent anlegen
-
-1. Datei in `.claude/agents/[name].md` erstellen
-2. Frontmatter mit `name`, `description`, `model`, `tools` ausfüllen
-3. System-Prompt im Body schreiben
-4. In `CLAUDE.md` Tabelle eintragen
-
-## Neuen Skill anlegen
-
-1. Datei in `.claude/skills/[name].md` erstellen
-2. Kotlin-Klasse in `app/.../skills/[Name]Skill.kt` implementieren
-3. In `SkillRegistry.kt` registrieren
-4. In `CLAUDE.md` Tabelle eintragen
-
-## Entwicklungs-Konventionen
-
-- Modell: `claude-opus-4-6`
-- API-Key: in `local.properties` → `ANTHROPIC_API_KEY=...` (niemals committen)
-- Async: Kotlin Coroutines (`Dispatchers.IO` für API-Calls)
-- Skill-Felder: `@JvmField` damit Jackson die Properties direkt lesen kann
