@@ -111,6 +111,55 @@ private fun MeineKomponenteVorschau() {
 }
 ```
 
+## Stateful / Stateless Trennung
+
+Jeder Screen besteht aus zwei Composables:
+- `XyzScreen` — **stateful**: hat ViewModel, sammelt State, startet ActivityResult-Launcher
+- `XyzInhalt` — **stateless**: bekommt alles als Parameter, hat `@Preview`, kennt kein ViewModel
+
+```kotlin
+// Stateful: Verbindet den ViewModel mit dem UI.
+@Composable
+fun FotoScreen(viewModel: FotoViewModel = viewModel(), onMenuOeffnen: () -> Unit = {}) {
+    val fotos by viewModel.fotos.collectAsState()
+    FotoInhalt(fotos = fotos, onMenuOeffnen = onMenuOeffnen)
+}
+
+// Stateless: Zeigt den Inhalt — keine ViewModel-Abhängigkeit.
+@Composable
+fun FotoInhalt(fotos: List<Uri>, onMenuOeffnen: () -> Unit = {}) { ... }
+```
+
+`XyzScreen` bekommt **keine** `@Preview` — wegen ViewModel-Abhängigkeit.
+`XyzInhalt` bekommt immer mindestens eine `@Preview`.
+
+---
+
+## Scaffold-Standard
+
+Jeder Screen verwendet `Scaffold` mit `CenterAlignedTopAppBar`:
+
+```kotlin
+Scaffold(
+    topBar = {
+        CenterAlignedTopAppBar(
+            title = { Text("Titel", color = TextHell) },
+            navigationIcon = {
+                IconButton(onClick = onMenuOeffnen) {
+                    Icon(Icons.Filled.Menu, "Menü öffnen", tint = TextHell)
+                }
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = OberflächenFarbe
+            )
+        )
+    },
+    containerColor = AppHintergrund
+) { innenAbstand -> /* Inhalt mit .padding(innenAbstand) */ }
+```
+
+---
+
 ## Weitere Konventionen
 
 > Neue Einträge hier einfügen wenn sie während einer Aufgabe erkannt werden.
