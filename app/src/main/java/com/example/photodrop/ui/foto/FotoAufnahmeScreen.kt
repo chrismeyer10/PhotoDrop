@@ -1,5 +1,6 @@
 package com.example.photodrop.ui.foto
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,7 +28,11 @@ import com.example.photodrop.ui.theme.PhotoDropTheme
 fun FotoAufnahmeScreen(viewModel: FotoViewModel = viewModel()) {
     val fotos by viewModel.fotos.collectAsState()
     val fotoAktion = kameraAktionErstellen { viewModel.fotoHinzufuegen(it) }
+    FotoAufnahmeInhalt(fotos = fotos, onFotoAufnehmen = fotoAktion)
+}
 
+@Composable
+fun FotoAufnahmeInhalt(fotos: List<Uri>, onFotoAufnehmen: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -40,7 +45,7 @@ fun FotoAufnahmeScreen(viewModel: FotoViewModel = viewModel()) {
                 .padding(bottom = 100.dp)
         )
         KameraAusloeser(
-            onClick = fotoAktion,
+            onClick = onFotoAufnehmen,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 36.dp)
@@ -65,44 +70,18 @@ private fun KameraAusloeser(onClick: () -> Unit, modifier: Modifier = Modifier) 
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A)
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Leerzustand")
 @Composable
-private fun FotoAufnahmeScreenLeerzustandVorschau() {
+private fun FotoAufnahmeInhaltLeerVorschau() {
     PhotoDropTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(AppHintergrund)
-        ) {
-            FotoListe(
-                fotos = emptyList(),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 100.dp)
-            )
-            KameraAusloeser(
-                onClick = {},
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 36.dp)
-            )
-        }
+        FotoAufnahmeInhalt(fotos = emptyList(), onFotoAufnehmen = {})
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A)
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Mit Fotos")
 @Composable
-private fun KameraAusloeserVorschau() {
+private fun FotoAufnahmeInhaltMitFotosVorschau() {
     PhotoDropTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(AppHintergrund)
-        ) {
-            KameraAusloeser(
-                onClick = {},
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
-        }
+        FotoAufnahmeInhalt(fotos = List(4) { Uri.EMPTY }, onFotoAufnehmen = {})
     }
 }
