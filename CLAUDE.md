@@ -2,11 +2,34 @@
 
 ## Pflicht bei jeder Aufgabe
 
-1. **`CONVENTIONS.md` lesen** und den gesamten Code danach ausrichten
-2. **Neue Conventions erkennen** → sofort in `CONVENTIONS.md` unter "Weitere Konventionen" eintragen
-3. **`build-check` Agent aufrufen** BEVOR ein Commit erstellt wird — `./gradlew compileDebugKotlin` muss fehlerfrei durchlaufen
-4. **`code-cleanup` Agent aufrufen** nachdem die Aufgabe abgeschlossen ist *(Kotlin-Code: tote Imports, Duplikate, veraltete Abhängigkeiten)*
-5. **`.gitignore` prüfen** wenn neue Dateien als "Unversioned" auftauchen — IDE-Dateien (.idea/) und Build-Artefakte gehören nie ins Repo
+1. **Feature-Branch erstellen** — NIEMALS direkt auf `main` arbeiten
+   - Branch-Name: `feat/`, `fix/`, `docs/`, `refactor/` + kurzer beschreibender Name
+   - Beispiele: `feat/foto-galerie`, `fix/kamera-erlaubnis`, `docs/kommentare`
+   - Nach Abschluss: PR erstellen und mergen
+2. **`CONVENTIONS.md` lesen** und den gesamten Code danach ausrichten
+3. **Neue Conventions erkennen** → sofort in `CONVENTIONS.md` unter "Weitere Konventionen" eintragen
+4. **`build-check` Agent aufrufen** BEVOR ein Commit erstellt wird — `./gradlew compileDebugKotlin` muss fehlerfrei durchlaufen
+5. **`code-cleanup` Agent aufrufen** nachdem die Aufgabe abgeschlossen ist *(Kotlin-Code: tote Imports, Duplikate, veraltete Abhängigkeiten)*
+6. **`struktur-check` Agent aufrufen** wenn neue Dateien entstehen oder die Struktur wächst — prüft ob alles sinnvoll aufgeteilt ist
+7. **`.gitignore` prüfen** wenn neue Dateien als "Unversioned" auftauchen — IDE-Dateien (.idea/) und Build-Artefakte gehören nie ins Repo
+
+## Git-Workflow
+
+```
+# 1. Branch anlegen
+git checkout main && git pull
+git checkout -b feat/mein-feature
+
+# 2. Änderungen committen
+git add <dateien>
+git commit -m "feat: kurze Beschreibung"
+
+# 3. Push + PR
+git push -u origin feat/mein-feature
+# → PR über GitHub API (Node.js) erstellen und mergen
+```
+
+**Wichtig:** Vor dem Branch-Anlegen immer `git pull` auf main — so gibt es keine Konflikte.
 
 ## Projektübersicht
 
@@ -23,8 +46,9 @@ Jeder Agent hat klar definierte Tools und einen eigenen Fokus.
 
 | Agent | Datei | Zweck |
 |-------|-------|-------|
-| `code-cleanup` | `code-cleanup.md` | Findet und löscht überflüssigen/redundanten Code |
 | `build-check` | `build-check.md` | Führt `compileDebugKotlin` aus und meldet/repariert Fehler |
+| `code-cleanup` | `code-cleanup.md` | Findet und löscht überflüssigen/redundanten Code |
+| `struktur-check` | `struktur-check.md` | Überwacht Datei-/Paketstruktur, erzwingt kleine Komponenten |
 | `figma-agent` | `figma-agent.md` | Ruft Figma-Designs ab und wandelt sie in Compose-Code um |
 | *Placeholder* | `photo-agent.md` | TODO |
 
@@ -49,10 +73,13 @@ Sie kapseln wiederkehrende Aufgaben und Standards.
 app/src/main/java/com/example/photodrop/
 ├── agent/
 │   └── AgentService.kt       ← Führt Agents mit Skills als Tools aus
-└── skills/
-    ├── Skill.kt              ← Basis-Typ (typealias für Supplier<String>)
-    ├── SkillRegistry.kt      ← Registriert alle aktiven Skills
-    └── GetPhotoInfoSkill.kt  ← Beispiel-Skill (Placeholder)
+├── skills/
+│   ├── Skill.kt              ← Basis-Typ (typealias für Supplier<String>)
+│   ├── SkillRegistry.kt      ← Registriert alle aktiven Skills
+│   └── GetPhotoInfoSkill.kt  ← Beispiel-Skill (Placeholder)
+└── ui/
+    ├── theme/                ← Farben, Typografie, Theme
+    └── foto/                 ← Foto-Aufnahme-Feature
 ```
 
 ## Neuen Agent anlegen
