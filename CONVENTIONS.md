@@ -60,9 +60,27 @@ fun fotoVerarbeiten(uri: String): Ergebnis {
 
 ## Kommentare
 
-- Kommentare erklären das **Warum**, nicht das Was
+- **Jede öffentliche Klasse und Funktion bekommt einen kurzen Kommentar** direkt darüber
+- Kommentar auf Deutsch, 1–2 Zeilen, einfache Sprache — verständlich auch ohne Vorkenntnisse
+- Erklärt **was** die Einheit tut (bei Klassen/Composables) oder **was** zurückgegeben wird (bei Funktionen)
+- Private Hilfsfunktionen nur kommentieren wenn die Logik nicht selbsterklärend ist
 - Kein auskommentierter Code im Repository
 - TODOs immer mit Kontext: `// TODO: Warum ist das noch offen?`
+
+**Richtig:**
+```kotlin
+// Zeigt ein einzelnes Foto als quadratische Karte mit abgerundeten Ecken.
+@Composable
+fun FotoKarte(uri: Uri, modifier: Modifier = Modifier) { ... }
+
+// Fügt ein neues Foto an das Ende der Liste an.
+fun fotoHinzufuegen(uri: Uri) { ... }
+```
+**Falsch:**
+```kotlin
+// Diese Funktion fügt ein Foto hinzu indem sie die Liste updated
+fun fotoHinzufuegen(uri: Uri) { ... }
+```
 
 ---
 
