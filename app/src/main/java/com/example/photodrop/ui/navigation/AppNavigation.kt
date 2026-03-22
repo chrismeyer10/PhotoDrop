@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.photodrop.dokument.DokumentScreen
 import com.example.photodrop.ui.drive.DriveScreen
 import com.example.photodrop.ui.drive.DriveViewModel
 import com.example.photodrop.ui.foto.FotoAufnahmeScreen
@@ -61,6 +62,12 @@ fun AppNavigation() {
                             launchSingleTop = true
                         }
                     }
+                )
+            }
+            composable(NavigationsZiel.Dokument.route) {
+                DokumentScreen(
+                    driveViewModel = driveViewModel,
+                    onMenuOeffnen = { scope.launch { schubladenZustand.open() } }
                 )
             }
             composable(NavigationsZiel.GoogleDrive.route) {

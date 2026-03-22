@@ -77,6 +77,16 @@ object DriveVerbindung {
         return ordnerSuchen(token, ordnerName) ?: ordnerErstellen(token, ordnerName)
     }
 
+    // Delegiert Datei-Upload an DriveUpload.
+    suspend fun dateiHochladen(
+        token: String, ordnerId: String, dateiName: String, mimeType: String, inhalt: ByteArray
+    ): String = DriveUpload.dateiHochladen(token, ordnerId, dateiName, mimeType, inhalt)
+
+    // Delegiert Unterordner-Sicherstellung an DriveUpload.
+    suspend fun unterordnerSicherstellen(
+        token: String, elternId: String, name: String
+    ): String = DriveUpload.unterordnerSicherstellen(token, elternId, name)
+
     // Laedt den Inhalt eines Drive-Ordners.
     suspend fun ordnerInhaltLaden(token: String, ordnerId: String): List<DriveOrdnerDatei> =
         withContext(Dispatchers.IO) {

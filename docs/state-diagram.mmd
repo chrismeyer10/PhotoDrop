@@ -8,7 +8,10 @@ stateDiagram-v2
     [*] --> FotoAufnahmeScreen
 
     FotoAufnahmeScreen --> DriveScreen : Drawer / Ordner fehlt
+    FotoAufnahmeScreen --> DokumentScreen : Drawer
     DriveScreen --> FotoAufnahmeScreen : Drawer
+    DokumentScreen --> FotoAufnahmeScreen : Drawer
+    DokumentScreen --> DriveScreen : Drawer
 
     state FotoAufnahmeScreen {
         [*] --> FotoListe
@@ -45,6 +48,20 @@ stateDiagram-v2
         Verbunden --> InhaltGeladen : Ordnerinhalt geladen
         Verbunden --> NichtVerbunden : Abmelden
         InhaltGeladen --> NichtVerbunden : Abmelden
+    }
+
+    state DokumentScreen {
+        [*] --> DokBereit
+        DokBereit --> DokGeladen : Foto / Datei
+        DokGeladen --> DokAnalysiert : analysieren()
+        DokGeladen --> DokBereit : zuruecksetzen()
+        DokAnalysiert --> DokVorschlag : KI-Antwort
+        DokAnalysiert --> DokFehler : Fehler
+        DokVorschlag --> DokHochladen : hochladen()
+        DokHochladen --> DokFertig : Erfolg
+        DokHochladen --> DokFehler : Fehler
+        DokFertig --> DokBereit : zuruecksetzen()
+        DokFehler --> DokBereit : zuruecksetzen()
     }
 
     state AgentService {
