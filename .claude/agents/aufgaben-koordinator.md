@@ -159,6 +159,15 @@ Wenn der PR bereits existiert (422-Fehler): PR-Nummer direkt über die API abruf
 git checkout main && git pull
 ```
 
+### 11. Debug-APK bauen
+```bash
+./gradlew assembleDebug
+```
+Die fertige APK liegt unter:
+`app/build/outputs/apk/debug/app-debug.apk`
+
+Dem Nutzer nach Abschluss mitteilen: **"APK liegt unter `app/build/outputs/apk/debug/app-debug.apk`"**
+
 ## Patterns erkennen und festhalten
 
 Wenn du während einer Aufgabe ein **wiederkehrendes Muster** siehst das noch
