@@ -27,14 +27,14 @@ import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextHell
 
 // Inhalt der linken Seitenleiste.
-// Zeigt alle Navigationsziele als klickbare Einträge an.
+// Zeigt alle Navigationsziele als klickbare Eintraege an.
 @Composable
 fun NavigationsLeisteInhalt(
     aktuelleRoute: String,
     onZielAusgewaehlt: (NavigationsZiel) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val ziele = listOf(NavigationsZiel.FotoAufnahme, NavigationsZiel.Dokument, NavigationsZiel.GoogleDrive)
+    val ziele = listOf(NavigationsZiel.Archiv, NavigationsZiel.GoogleDrive)
 
     Column(
         modifier = modifier
@@ -102,7 +102,7 @@ private fun NavigationsEintrag(
 private fun NavigationsLeisteVorschau() {
     PhotoDropTheme {
         NavigationsLeisteInhalt(
-            aktuelleRoute = NavigationsZiel.FotoAufnahme.route,
+            aktuelleRoute = NavigationsZiel.Archiv.route,
             onZielAusgewaehlt = {}
         )
     }

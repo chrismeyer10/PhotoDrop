@@ -3,10 +3,10 @@
 %% Package: ui.navigation
 
 stateDiagram-v2
-    [*] --> FotoAufnahmeScreen
+    [*] --> ArchivScreen
 
     state AppNavigation {
-        [*] --> FotoAufnahmeScreen
+        [*] --> ArchivScreen
 
         state Seitenleiste {
             [*] --> Geschlossen
@@ -15,12 +15,11 @@ stateDiagram-v2
             Geoeffnet --> Geschlossen : Ausserhalb tippen
         }
 
-        FotoAufnahmeScreen --> DriveScreen : Navigation via Drawer
-        FotoAufnahmeScreen --> DriveScreen : OrdnerFehltDialog -> Zu Drive
-        DriveScreen --> FotoAufnahmeScreen : Navigation via Drawer
+        ArchivScreen --> DriveScreen : Navigation via Drawer
+        DriveScreen --> ArchivScreen : Navigation via Drawer
     }
 
     state NavigationsZiel {
-        FotoAufnahme : Route = "fotos"
+        Archiv : Route = "archiv"
         GoogleDrive : Route = "drive"
     }
