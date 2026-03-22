@@ -20,9 +20,15 @@ import com.example.photodrop.ui.theme.KartenFarbe
 import com.example.photodrop.ui.theme.PhotoDropTheme
 
 // Zeigt ein einzelnes Foto als quadratische Karte mit abgerundeten Ecken.
+// Bei Klick wird onKlick mit der URI aufgerufen.
 @Composable
-fun FotoKarte(uri: Uri, modifier: Modifier = Modifier) {
+fun FotoKarte(
+    uri: Uri,
+    onKlick: (Uri) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     Card(
+        onClick = { onKlick(uri) },
         modifier = modifier.aspectRatio(1f),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),

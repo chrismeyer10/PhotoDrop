@@ -117,16 +117,6 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Aktualisiert den Ordnerinhalt.
-    fun inhaltAktualisieren() {
-        val aktuell = _zustand.value as? DriveZustand.InhaltGeladen ?: return
-        viewModelScope.launch {
-            val konto = DriveAnmeldung.letztesKontoHolen(getApplication()) ?: return@launch
-            val token = DriveAnmeldung.tokenHolen(getApplication(), konto)
-            ordnerInhaltLaden(token, aktuell.kontoName, aktuell.ordnerId)
-        }
-    }
-
     // Erstellt den Sign-In Intent.
     fun anmeldeIntentErstellen(): Intent = DriveAnmeldung.intentErstellen(getApplication())
 

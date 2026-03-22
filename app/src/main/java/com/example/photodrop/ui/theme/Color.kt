@@ -8,6 +8,6 @@ val AppHintergrund = Color(0xFF0A0A0A)      // Hintergrund der gesamten App
 val OberflächenFarbe = Color(0xFF141414)    // Leicht hellere Oberflächen (z.B. BottomBar)
 val KartenFarbe = Color(0xFF1E1E1E)         // Hintergrund von Karten
 val AkzentFarbe = Color(0xFFFF5C5C)         // Hauptakzentfarbe (Rot) — für Buttons und Icons
-val AkzentHell = Color(0xFFFF8A80)          // Hellere Variante des Akzents
+
 val TextHell = Color(0xFFFFFFFF)            // Primärer Text — weiß
 val TextGedaempft = Color(0xFF6B6B6B)       // Sekundärer Text — grau, für Hinweise

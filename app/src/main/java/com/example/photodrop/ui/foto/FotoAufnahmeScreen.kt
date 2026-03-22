@@ -20,15 +20,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.photodrop.ui.drive.DriveViewModel
+import com.example.photodrop.ui.foto.analyse.FotoAnalyseDialog
+import com.example.photodrop.ui.foto.analyse.FotoAnalyseViewModel
 import com.example.photodrop.ui.foto.galerie.FotoListe
 import com.example.photodrop.ui.foto.kamera.KameraAusloeser
 import com.example.photodrop.ui.foto.kamera.kameraAktionErstellen
 import com.example.photodrop.ui.theme.AppHintergrund
 import com.example.photodrop.ui.theme.OberflächenFarbe
-import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextHell
 
 // Stateful: Verbindet den ViewModel mit dem UI.
@@ -37,11 +37,14 @@ import com.example.photodrop.ui.theme.TextHell
 fun FotoAufnahmeScreen(
     viewModel: FotoViewModel = viewModel(),
     driveViewModel: DriveViewModel = viewModel(),
+    analyseViewModel: FotoAnalyseViewModel = viewModel(),
     onMenuOeffnen: () -> Unit = {},
     onZuDrive: () -> Unit = {}
 ) {
     val fotos by viewModel.fotos.collectAsState()
+    val analyseZustand by analyseViewModel.zustand.collectAsState()
     var zeigeOrdnerDialog by remember { mutableStateOf(false) }
+    var zeigeAnalyseDialog by remember { mutableStateOf(false) }
 
     val fotoAktion = kameraAktionErstellen { viewModel.fotoHinzufuegen(it) }
 
@@ -53,6 +56,10 @@ fun FotoAufnahmeScreen(
             } else {
                 zeigeOrdnerDialog = true
             }
+        },
+        onFotoKlick = { uri ->
+            analyseViewModel.analysieren(uri)
+            zeigeAnalyseDialog = true
         },
         onMenuOeffnen = onMenuOeffnen
     )
@@ -66,6 +73,16 @@ fun FotoAufnahmeScreen(
             onAbbrechen = { zeigeOrdnerDialog = false }
         )
     }
+
+    if (zeigeAnalyseDialog) {
+        FotoAnalyseDialog(
+            zustand = analyseZustand,
+            onSchliessen = {
+                zeigeAnalyseDialog = false
+                analyseViewModel.zuruecksetzen()
+            }
+        )
+    }
 }
 
 // Stateless: Zeigt die Fotoliste mit TopAppBar und Kamera-Button.
@@ -74,6 +91,7 @@ fun FotoAufnahmeScreen(
 fun FotoAufnahmeInhalt(
     fotos: List<Uri>,
     onFotoAufnehmen: () -> Unit,
+    onFotoKlick: (Uri) -> Unit = {},
     onMenuOeffnen: () -> Unit = {}
 ) {
     Scaffold(
@@ -96,25 +114,10 @@ fun FotoAufnahmeInhalt(
     ) { innenAbstand ->
         FotoListe(
             fotos = fotos,
+            onFotoKlick = onFotoKlick,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innenAbstand)
         )
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Leerzustand")
-@Composable
-private fun FotoAufnahmeInhaltLeerVorschau() {
-    PhotoDropTheme {
-        FotoAufnahmeInhalt(fotos = emptyList(), onFotoAufnehmen = {})
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Mit Fotos")
-@Composable
-private fun FotoAufnahmeInhaltMitFotosVorschau() {
-    PhotoDropTheme {
-        FotoAufnahmeInhalt(fotos = List(4) { Uri.EMPTY }, onFotoAufnehmen = {})
     }
 }
