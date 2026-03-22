@@ -16,7 +16,11 @@ import com.example.photodrop.ui.theme.PhotoDropTheme
 // Zeigt alle Fotos in einem 2-spaltigen Raster.
 // Ist die Liste leer, erscheint stattdessen der Leerzustand.
 @Composable
-fun FotoListe(fotos: List<Uri>, modifier: Modifier = Modifier) {
+fun FotoListe(
+    fotos: List<Uri>,
+    onFotoKlick: (Uri) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     if (fotos.isEmpty()) {
         FotoListeLeerzustand(modifier)
         return
@@ -28,7 +32,7 @@ fun FotoListe(fotos: List<Uri>, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = modifier
     ) {
-        items(fotos) { uri -> FotoKarte(uri = uri) }
+        items(fotos) { uri -> FotoKarte(uri = uri, onKlick = onFotoKlick) }
     }
 }
 

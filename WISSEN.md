@@ -8,14 +8,15 @@
 |---------|--------------|--------|
 | Foto aufnehmen | `FotoAufnahmeScreen`, `FotoViewModel`, `kamera/*` | Implementiert |
 | Foto-Galerie anzeigen | `galerie/FotoListe`, `galerie/FotoKarte` | Implementiert |
+| KI-Foto-Analyse | `analyse/FotoAnalyseDialog`, `analyse/FotoAnalyseViewModel` | Implementiert |
 | Google Drive verbinden | `DriveScreen`, `DriveViewModel`, `api/DriveVerbindung` | Implementiert |
 | Drive-Anmeldung | `anmeldung/DriveAnmeldung` | Implementiert |
 | Drive-Zustaende | `zustand/DriveZustand`, `zustand/*Inhalt` | Implementiert |
 | Ordner-Einstellungen | `OrdnerEinstellungen` | Implementiert |
 | Persistente Drive-Session | `DriveViewModel.automatischVerbinden()` | Implementiert |
 | Linke Navigationsleiste | `AppNavigation`, `NavigationsLeiste`, `NavigationsZiel` | Implementiert |
-| KI-Agent (Claude) | `AgentService`, `SkillRegistry` | Grundstruktur vorhanden |
-| Foto-Info-Skill | `GetPhotoInfoSkill` | Stub (TODO offen) |
+| KI-Agent (Claude) | `AgentService`, `SkillRegistry` | Eingebunden via FotoAnalyse |
+| Foto-Info-Skill | `GetPhotoInfoSkill` | Implementiert |
 
 ## Paketstruktur
 
@@ -39,14 +40,19 @@ app/src/main/java/com/example/photodrop/
     │   └── NavigationsZiel.kt
     ├── foto/
     │   ├── FotoAufnahmeScreen.kt      (Stateful + Stateless)
+    │   ├── FotoAufnahmeVorschau.kt    (Previews)
     │   ├── FotoViewModel.kt
     │   ├── OrdnerFehltDialog.kt
+    │   ├── analyse/
+    │   │   ├── FotoAnalyseDialog.kt   (KI-Analyse Dialog)
+    │   │   ├── FotoAnalyseViewModel.kt
+    │   │   └── FotoAnalyseZustand.kt
     │   ├── kamera/
     │   │   ├── KameraAusloeser.kt     (FAB-Button)
     │   │   ├── KameraHilfe.kt         (Datei-URI, Erlaubnis)
     │   │   └── KameraSteuerer.kt      (Composable Launcher)
     │   └── galerie/
-    │       ├── FotoKarte.kt           (Einzelne Foto-Kachel)
+    │       ├── FotoKarte.kt           (Einzelne Foto-Kachel, klickbar)
     │       ├── FotoListe.kt           (Grid-Ansicht)
     │       └── FotoListeLeerzustand.kt
     └── drive/
@@ -84,9 +90,7 @@ app/src/main/java/com/example/photodrop/
 
 ## Offene TODOs
 
-| Datei | Beschreibung |
-|-------|--------------|
-| `GetPhotoInfoSkill.kt` | Echte Implementierung -- z.B. ContentResolver, ExifInterface |
+Keine offenen TODOs.
 
 ## Architektur-Notizen
 
@@ -97,4 +101,5 @@ app/src/main/java/com/example/photodrop/
 - **Drive-Zustand: Sealed Interface** -- exhaustive when-Ausdruecke
 - **Anmelde-Logik: DriveAnmeldung** -- Singleton kapselt Google Sign-In
 - **Ordner-Persistenz: OrdnerEinstellungen** -- SharedPreferences-Wrapper
-- **KI-Integration: Anthropic Java SDK** -- AgentService mit ToolRunner
+- **KI-Integration: Anthropic Java SDK** -- AgentService mit ToolRunner, eingebunden via FotoAnalyseDialog
+- **FotoKarte klickbar** -- Oeffnet KI-Analyse-Dialog bei Tap auf ein Foto

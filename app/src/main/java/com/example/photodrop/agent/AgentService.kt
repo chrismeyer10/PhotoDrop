@@ -8,58 +8,48 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.function.Supplier
 
-/**
- * Core agent service. Runs a Claude agent with the given skills (tools).
- *
- * Usage:
- * ```kotlin
- * val agent = AgentService(BuildConfig.ANTHROPIC_API_KEY)
- * val result = agent.run(
- *     prompt = "Analysiere dieses Foto",
- *     skills = SkillRegistry.all,
- *     systemPrompt = "Du bist ein hilfreicher Foto-Assistent."
- * )
- * ```
- */
+// Fuehrt einen Claude-Agent mit Skills (Tools) aus.
+// Benoetigt einen gueltigen Anthropic API-Key.
 class AgentService(apiKey: String) {
 
     private val client: AnthropicClient = AnthropicOkHttpClient.builder()
         .apiKey(apiKey)
         .build()
 
-    /**
-     * Runs the agent with the given prompt and skills.
-     * The tool runner handles the agentic loop automatically —
-     * Claude calls skills as needed until it produces a final response.
-     */
+    // Fuehrt den Agent mit dem gegebenen Prompt und Skills aus.
+    // Der ToolRunner handhabt die Agenten-Schleife automatisch.
     suspend fun run(
         prompt: String,
         skills: List<Class<out Supplier<String>>> = emptyList(),
         systemPrompt: String? = null,
     ): AgentResult = withContext(Dispatchers.IO) {
         try {
-            val paramsBuilder = MessageCreateParams.builder()
+            val paramsBauer = MessageCreateParams.builder()
                 .model("claude-opus-4-6")
                 .maxTokens(16000L)
                 .addUserMessage(prompt)
 
-            systemPrompt?.let { paramsBuilder.system(it) }
-            skills.forEach { paramsBuilder.addTool(it) }
+            systemPrompt?.let { paramsBauer.system(it) }
+            skills.forEach { paramsBauer.addTool(it) }
 
-            val output = StringBuilder()
-            for (message: BetaMessage in client.beta().messages().toolRunner(paramsBuilder.build())) {
-                message.content().forEach { block ->
-                    block.text().ifPresent { output.append(it.text()) }
+            val ausgabe = StringBuilder()
+            for (nachricht: BetaMessage in client.beta().messages().toolRunner(paramsBauer.build())) {
+                nachricht.content().forEach { block ->
+                    block.text().ifPresent { ausgabe.append(it.text()) }
                 }
             }
-            AgentResult.Success(output.toString())
+            AgentResult.Success(ausgabe.toString())
         } catch (e: Exception) {
-            AgentResult.Error(e.message ?: "Unknown error", e)
+            AgentResult.Error(e.message ?: "Unbekannter Fehler", e)
         }
     }
 }
 
+// Moegliche Ergebnisse eines Agent-Laufs.
 sealed class AgentResult {
+    // Erfolgreiche Ausfuehrung mit Textantwort.
     data class Success(val text: String) : AgentResult()
+
+    // Fehler bei der Ausfuehrung.
     data class Error(val message: String, val cause: Throwable) : AgentResult()
 }

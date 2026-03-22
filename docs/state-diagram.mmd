@@ -14,8 +14,19 @@ stateDiagram-v2
         [*] --> FotoListe
         FotoListe --> OrdnerDialog : Kamera ohne Ordner
         FotoListe --> KameraOffen : Kamera mit Ordner
+        FotoListe --> FotoAnalyseDialog : Foto angetippt
         OrdnerDialog --> FotoListe : Abbrechen
         KameraOffen --> FotoListe : Foto gespeichert
+        FotoAnalyseDialog --> FotoListe : Schliessen
+    }
+
+    state FotoAnalyseDialog {
+        [*] --> AnalyseBereit
+        AnalyseBereit --> AnalyseLaeuft : analysieren()
+        AnalyseLaeuft --> AnalyseErgebnis : Erfolg
+        AnalyseLaeuft --> AnalyseFehler : Fehler
+        AnalyseErgebnis --> AnalyseBereit : zuruecksetzen()
+        AnalyseFehler --> AnalyseBereit : zuruecksetzen()
     }
 
     state DriveScreen {
