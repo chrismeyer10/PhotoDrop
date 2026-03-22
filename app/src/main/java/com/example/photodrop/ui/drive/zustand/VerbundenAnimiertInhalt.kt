@@ -1,4 +1,4 @@
-package com.example.photodrop.ui.drive
+package com.example.photodrop.ui.drive.zustand
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -27,14 +27,12 @@ import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextGedaempft
 import com.example.photodrop.ui.theme.TextHell
 
-// Zeigt die "Ordner bereit"-Bestätigung mit pulsierender Animation.
-// Wird für 2.5 Sekunden angezeigt bevor der Inhalt eingeblendet wird.
+// Zeigt die "Ordner bereit"-Bestaetigung mit pulsierender Animation.
 @Composable
 fun VerbundenAnimiertInhalt(zustand: DriveZustand.Verbunden) {
     val puls = rememberInfiniteTransition(label = "PulsAnimation")
     val skalierung by puls.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.12f,
+        initialValue = 1f, targetValue = 1.12f,
         animationSpec = infiniteRepeatable(
             animation = tween(800, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
@@ -47,8 +45,7 @@ fun VerbundenAnimiertInhalt(zustand: DriveZustand.Verbunden) {
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            imageVector = Icons.Filled.CheckCircle,
-            contentDescription = null,
+            Icons.Filled.CheckCircle, null,
             tint = AkzentFarbe,
             modifier = Modifier.size(72.dp).scale(skalierung)
         )

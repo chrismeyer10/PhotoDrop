@@ -1,16 +1,11 @@
-package com.example.photodrop.ui.foto
+package com.example.photodrop.ui.foto.galerie
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material3.Icon
@@ -24,29 +19,9 @@ import androidx.compose.ui.unit.dp
 import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextGedaempft
 
-// Zeigt alle Fotos in einem 2-spaltigen Raster.
-// Ist die Liste leer, erscheint stattdessen ein Hinweis-Screen.
-@Composable
-fun FotoListe(fotos: List<Uri>, modifier: Modifier = Modifier) {
-    if (fotos.isEmpty()) {
-        Leerzustand(modifier)
-        return
-    }
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = modifier
-    ) {
-        items(fotos) { uri -> FotoKarte(uri = uri) }
-    }
-}
-
 // Wird angezeigt wenn noch keine Fotos vorhanden sind.
-// Zeigt ein Kamera-Symbol und einen kurzen Erklärungstext.
 @Composable
-private fun Leerzustand(modifier: Modifier = Modifier) {
+fun FotoListeLeerzustand(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -67,19 +42,8 @@ private fun Leerzustand(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Leerzustand")
 @Composable
-private fun FotoListeLeerVorschau() {
+private fun FotoListeLeerzustandVorschau() {
     PhotoDropTheme {
-        FotoListe(fotos = emptyList(), modifier = Modifier.fillMaxSize())
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Mit Fotos")
-@Composable
-private fun FotoListeMitFotosVorschau() {
-    PhotoDropTheme {
-        FotoListe(
-            fotos = List(4) { Uri.EMPTY },
-            modifier = Modifier.fillMaxSize()
-        )
+        FotoListeLeerzustand()
     }
 }

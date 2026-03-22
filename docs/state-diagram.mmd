@@ -1,12 +1,13 @@
-%% PhotoDrop — State Diagram
-%% Pflege: Bei jeder Aufgabe aktualisieren wenn sich Zustände, Screens oder Flows ändern.
-%% Zeigt: App-Navigation, Screen-Zustände, DriveViewModel-Zustände, AgentService-Zustände.
+%% PhotoDrop — Gesamt State Diagram
+%% Pflege: Bei jeder Aufgabe aktualisieren wenn sich Zustaende, Screens oder Flows aendern.
+%% Zeigt: App-Navigation, Screen-Zustaende, DriveViewModel-Zustaende, AgentService-Zustaende.
+%% Detail-Diagramme: foto-state-diagram.mmd, drive-state-diagram.mmd,
+%%   navigation-state-diagram.mmd, agent-state-diagram.mmd
 
 stateDiagram-v2
     [*] --> FotoAufnahmeScreen
 
-    FotoAufnahmeScreen --> DriveScreen : Drawer
-    FotoAufnahmeScreen --> DriveScreen : Ordner fehlt
+    FotoAufnahmeScreen --> DriveScreen : Drawer / Ordner fehlt
     DriveScreen --> FotoAufnahmeScreen : Drawer
 
     state FotoAufnahmeScreen {
@@ -22,11 +23,11 @@ stateDiagram-v2
         NichtVerbunden --> Verbindet : Anmelden
         Verbindet --> OrdnerLaden : Anmeldung OK
         OrdnerLaden --> OrdnerAuswaehlen : Ordner vorhanden
-        OrdnerLaden --> OrdnerBenennen : Keine Ordner im Drive
-        OrdnerAuswaehlen --> Verbunden : Ordner ausgewählt
+        OrdnerLaden --> OrdnerBenennen : Keine Ordner
+        OrdnerAuswaehlen --> Verbunden : Ordner ausgewaehlt
         OrdnerAuswaehlen --> OrdnerBenennen : Neuen Ordner erstellen
-        OrdnerBenennen --> Verbindet : Bestätigen
-        Verbindet --> Verbunden : Ordner-ID gespeichert (Auto-Reconnect)
+        OrdnerBenennen --> Verbindet : Bestaetigen
+        Verbindet --> Verbunden : Auto-Reconnect mit Ordner
         Verbindet --> DriveFehler : Fehler
         DriveFehler --> NichtVerbunden : Zuruecksetzen
         Verbunden --> InhaltGeladen : Ordnerinhalt geladen

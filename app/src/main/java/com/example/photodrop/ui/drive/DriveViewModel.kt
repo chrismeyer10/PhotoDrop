@@ -4,12 +4,13 @@ import android.app.Application
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.GoogleAuthUtil
+import com.example.photodrop.ui.drive.anmeldung.DriveAnmeldung
+import com.example.photodrop.ui.drive.api.DriveOrdner
+import com.example.photodrop.ui.drive.api.DriveVerbindung
+import com.example.photodrop.ui.drive.zustand.DriveZustand
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.Scope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,31 +18,28 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-// Verwaltet die Google Drive Verbindung und den gespeicherten Ordnernamen.
+// Verwaltet die Google Drive Verbindung und den Zustandsfluss.
 class DriveViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val einstellungen = application.getSharedPreferences("drive_prefs", 0)
-    private val SCHLUESSEL_ORDNER_NAME = "ordner_name"
-    private val SCHLUESSEL_ORDNER_ID = "ordner_id"
+    private val ordnerPrefs = OrdnerEinstellungen(
+        application.getSharedPreferences("drive_prefs", 0)
+    )
 
     private val _zustand = MutableStateFlow<DriveZustand>(DriveZustand.NichtVerbunden)
     val zustand: StateFlow<DriveZustand> = _zustand
 
-    // Gespeicherter Ordnername — null wenn noch kein Ordner gewählt wurde.
-    val ordnerName: String? get() = einstellungen.getString(SCHLUESSEL_ORDNER_NAME, null)
-
-    // Gespeicherte Ordner-ID — null wenn noch kein Ordner gewählt wurde.
-    private val gespeicherteOrdnerId: String? get() = einstellungen.getString(SCHLUESSEL_ORDNER_ID, null)
+    // Gespeicherter Ordnername fuer andere ViewModels.
+    val ordnerName: String? get() = ordnerPrefs.ordnerName
 
     init { automatischVerbinden() }
 
-    // Prueft ob bereits ein Konto angemeldet ist und verbindet automatisch.
+    // Prueft ob bereits ein Konto angemeldet ist.
     private fun automatischVerbinden() {
-        val konto = GoogleSignIn.getLastSignedInAccount(getApplication()) ?: return
-        val name = ordnerName
-        val id = gespeicherteOrdnerId
+        val konto = DriveAnmeldung.letztesKontoHolen(getApplication()) ?: return
         _zustand.value = DriveZustand.Verbindet
         viewModelScope.launch {
+            val name = ordnerPrefs.ordnerName
+            val id = ordnerPrefs.ordnerId
             if (name != null && id != null) {
                 tokenHolenUndVerbinden(konto, name, id)
             } else {
@@ -50,34 +48,28 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Holt den Token und lädt die Ordnerliste zur Auswahl.
+    // Laedt die Ordnerliste zur Auswahl.
     private suspend fun ordnerListeAnzeigen(konto: GoogleSignInAccount) {
         try {
-            val token = tokenHolen(konto)
+            val token = DriveAnmeldung.tokenHolen(getApplication(), konto)
             val kontoName = konto.email ?: konto.displayName ?: ""
             _zustand.value = DriveZustand.OrdnerLaden(kontoName, token)
             val ordner = DriveVerbindung.ordnerListeLaden(token)
-            val gespeichert = gespeichertenOrdnerFinden(ordner)
-            if (ordner.isEmpty()) {
-                _zustand.value = DriveZustand.OrdnerBenennen(kontoName, token)
+            val gespeichert = ordner.find { it.id == ordnerPrefs.ordnerId }
+            _zustand.value = if (ordner.isEmpty()) {
+                DriveZustand.OrdnerBenennen(kontoName, token)
             } else {
-                _zustand.value = DriveZustand.OrdnerAuswaehlen(kontoName, token, ordner, gespeichert)
+                DriveZustand.OrdnerAuswaehlen(kontoName, token, ordner, gespeichert)
             }
         } catch (e: Exception) {
             _zustand.value = DriveZustand.NichtVerbunden
         }
     }
 
-    // Sucht den gespeicherten Ordner in der geladenen Liste.
-    private fun gespeichertenOrdnerFinden(ordner: List<DriveOrdner>): DriveOrdner? {
-        val id = gespeicherteOrdnerId ?: return null
-        return ordner.find { it.id == id }
-    }
-
-    // Holt den Token und stellt die Drive-Verbindung mit gespeicherter Ordner-ID her.
+    // Stellt die Verbindung mit gespeichertem Ordner her.
     private suspend fun tokenHolenUndVerbinden(konto: GoogleSignInAccount, name: String, id: String) {
         try {
-            val token = tokenHolen(konto)
+            val token = DriveAnmeldung.tokenHolen(getApplication(), konto)
             val kontoName = konto.email ?: konto.displayName ?: ""
             _zustand.value = DriveZustand.Verbunden(kontoName, id, token)
             ordnerInhaltLaden(token, kontoName, id)
@@ -86,16 +78,7 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Holt den OAuth2-Token für das gegebene Konto.
-    private suspend fun tokenHolen(konto: GoogleSignInAccount): String =
-        withContext(Dispatchers.IO) {
-            GoogleAuthUtil.getToken(
-                getApplication(), konto.account!!,
-                "oauth2:https://www.googleapis.com/auth/drive.file"
-            )
-        }
-
-    // Lädt den Ordnerinhalt — wartet mindestens 2.5s damit die Bereit-Animation sichtbar ist.
+    // Laedt den Ordnerinhalt mit Mindest-Anzeigezeit.
     private suspend fun ordnerInhaltLaden(token: String, kontoName: String, ordnerId: String) {
         val startZeit = System.currentTimeMillis()
         val dateien = DriveVerbindung.ordnerInhaltLaden(token, ordnerId)
@@ -104,39 +87,28 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         _zustand.value = DriveZustand.InhaltGeladen(kontoName, ordnerId, dateien)
     }
 
-    companion object {
-        // Mindestzeit die der Verbunden-Screen sichtbar bleibt (2.5 Sekunden).
-        private const val MINDEST_ANZEIGEZEIT_MS = 2_500L
-    }
-
-    // Wechselt zum "Neuen Ordner erstellen"-Formular aus der Auswahlliste.
+    // Wechselt zum Neuen-Ordner-Formular.
     fun neuenOrdnerErstellen() {
         val aktuell = _zustand.value as? DriveZustand.OrdnerAuswaehlen ?: return
         _zustand.value = DriveZustand.OrdnerBenennen(aktuell.kontoName, aktuell.token)
     }
 
-    // Wählt einen bestehenden Ordner aus, speichert ihn und startet die Verbindung.
+    // Waehlt einen bestehenden Ordner aus.
     fun ordnerAuswaehlen(ordner: DriveOrdner) {
         val aktuell = _zustand.value as? DriveZustand.OrdnerAuswaehlen ?: return
-        einstellungen.edit()
-            .putString(SCHLUESSEL_ORDNER_NAME, ordner.name)
-            .putString(SCHLUESSEL_ORDNER_ID, ordner.id)
-            .apply()
+        ordnerPrefs.speichern(ordner.name, ordner.id)
         _zustand.value = DriveZustand.Verbunden(aktuell.kontoName, ordner.id, aktuell.token)
         viewModelScope.launch { ordnerInhaltLaden(aktuell.token, aktuell.kontoName, ordner.id) }
     }
 
-    // Speichert den neuen Ordnernamen, erstellt den Ordner in Drive und verbindet.
+    // Erstellt einen neuen Ordner in Drive.
     fun ordnerBestaetigen(name: String) {
         val aktuell = _zustand.value as? DriveZustand.OrdnerBenennen ?: return
         _zustand.value = DriveZustand.Verbindet
         viewModelScope.launch {
             val ordnerId = DriveVerbindung.ordnerSicherstellen(aktuell.token, name)
             if (ordnerId != null) {
-                einstellungen.edit()
-                    .putString(SCHLUESSEL_ORDNER_NAME, name)
-                    .putString(SCHLUESSEL_ORDNER_ID, ordnerId)
-                    .apply()
+                ordnerPrefs.speichern(name, ordnerId)
                 _zustand.value = DriveZustand.Verbunden(aktuell.kontoName, ordnerId, aktuell.token)
                 ordnerInhaltLaden(aktuell.token, aktuell.kontoName, ordnerId)
             } else {
@@ -145,31 +117,25 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Aktualisiert den Ordnerinhalt wenn bereits verbunden (z.B. nach neuem Foto).
+    // Aktualisiert den Ordnerinhalt.
     fun inhaltAktualisieren() {
         val aktuell = _zustand.value as? DriveZustand.InhaltGeladen ?: return
         viewModelScope.launch {
-            val konto = GoogleSignIn.getLastSignedInAccount(getApplication()) ?: return@launch
-            val token = tokenHolen(konto)
+            val konto = DriveAnmeldung.letztesKontoHolen(getApplication()) ?: return@launch
+            val token = DriveAnmeldung.tokenHolen(getApplication(), konto)
             ordnerInhaltLaden(token, aktuell.kontoName, aktuell.ordnerId)
         }
     }
 
-    // Erstellt den Google Sign-In Intent mit Drive-Berechtigung.
-    fun anmeldeIntentErstellen(): Intent {
-        val optionen = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(Scope("https://www.googleapis.com/auth/drive.file"))
-            .build()
-        return GoogleSignIn.getClient(getApplication(), optionen).signInIntent
-    }
+    // Erstellt den Sign-In Intent.
+    fun anmeldeIntentErstellen(): Intent = DriveAnmeldung.intentErstellen(getApplication())
 
-    // Verarbeitet das Ergebnis des Sign-In Intents.
+    // Verarbeitet das Sign-In Ergebnis.
     fun anmeldeErgebnisVerarbeiten(daten: Intent?) {
         _zustand.value = DriveZustand.Verbindet
         viewModelScope.launch {
             try {
-                val konto: GoogleSignInAccount = withContext(Dispatchers.IO) {
+                val konto = withContext(Dispatchers.IO) {
                     GoogleSignIn.getSignedInAccountFromIntent(daten)
                         .getResult(ApiException::class.java)
                 }
@@ -182,19 +148,18 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Setzt den Zustand zurück damit der Nutzer es erneut versuchen kann.
+    // Setzt den Zustand zurueck.
     fun zuruecksetzen() { _zustand.value = DriveZustand.NichtVerbunden }
 
-    // Meldet den Nutzer von Google Drive ab und löscht den gespeicherten Ordner.
+    // Meldet ab und loescht die Einstellungen.
     fun abmelden() {
-        einstellungen.edit()
-            .remove(SCHLUESSEL_ORDNER_NAME)
-            .remove(SCHLUESSEL_ORDNER_ID)
-            .apply()
-        val optionen = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail().requestScopes(Scope("https://www.googleapis.com/auth/drive.file"))
-            .build()
-        GoogleSignIn.getClient(getApplication(), optionen)
-            .signOut().addOnCompleteListener { _zustand.value = DriveZustand.NichtVerbunden }
+        ordnerPrefs.loeschen()
+        DriveAnmeldung.abmelden(getApplication()) {
+            _zustand.value = DriveZustand.NichtVerbunden
+        }
+    }
+
+    companion object {
+        private const val MINDEST_ANZEIGEZEIT_MS = 2_500L
     }
 }

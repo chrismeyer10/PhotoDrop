@@ -1,0 +1,27 @@
+%% PhotoDrop — Agent/Skills State Diagram
+%% Zeigt die Zustaende des KI-Agent-Systems.
+%% Packages: agent, skills
+
+stateDiagram-v2
+    state AgentService {
+        [*] --> Bereit
+        Bereit --> Laeuft : run(prompt, skills)
+        Laeuft --> ToolAufruf : Claude ruft Skill auf
+        ToolAufruf --> Laeuft : Skill-Ergebnis zurueck
+        Laeuft --> Erfolgreich : Finale Antwort
+        Laeuft --> AgentFehler : Exception
+        Erfolgreich --> Bereit
+        AgentFehler --> Bereit
+    }
+
+    state SkillRegistry {
+        [*] --> Registriert
+        Registriert : GetPhotoInfoSkill
+        note right of Registriert : Weitere Skills hier eintragen
+    }
+
+    state GetPhotoInfoSkill {
+        [*] --> WartetAufURI
+        WartetAufURI --> InfoGeladen : get() aufgerufen
+        InfoGeladen --> [*]
+    }

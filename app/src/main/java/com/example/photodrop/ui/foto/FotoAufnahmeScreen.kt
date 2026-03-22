@@ -3,15 +3,11 @@ package com.example.photodrop.ui.foto
 import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -24,19 +20,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.photodrop.ui.drive.DriveViewModel
-import com.example.photodrop.ui.theme.AkzentFarbe
+import com.example.photodrop.ui.foto.galerie.FotoListe
+import com.example.photodrop.ui.foto.kamera.KameraAusloeser
+import com.example.photodrop.ui.foto.kamera.kameraAktionErstellen
 import com.example.photodrop.ui.theme.AppHintergrund
 import com.example.photodrop.ui.theme.OberflächenFarbe
 import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextHell
 
 // Stateful: Verbindet den ViewModel mit dem UI.
-// Prüft ob ein Drive-Ordner gesetzt ist bevor ein Foto gemacht werden kann.
+// Prueft ob ein Drive-Ordner gesetzt ist bevor ein Foto gemacht werden kann.
 @Composable
 fun FotoAufnahmeScreen(
     viewModel: FotoViewModel = viewModel(),
@@ -73,7 +69,6 @@ fun FotoAufnahmeScreen(
 }
 
 // Stateless: Zeigt die Fotoliste mit TopAppBar und Kamera-Button.
-// Weiß nichts vom ViewModel — bekommt alles was es braucht von außen.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FotoAufnahmeInhalt(
@@ -87,11 +82,7 @@ fun FotoAufnahmeInhalt(
                 title = { Text("Fotos", color = TextHell) },
                 navigationIcon = {
                     IconButton(onClick = onMenuOeffnen) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Menü öffnen",
-                            tint = TextHell
-                        )
+                        Icon(Icons.Filled.Menu, "Menue oeffnen", tint = TextHell)
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -108,24 +99,6 @@ fun FotoAufnahmeInhalt(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innenAbstand)
-        )
-    }
-}
-
-// Runder Kamera-Button unten in der Mitte.
-@Composable
-private fun KameraAusloeser(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    FloatingActionButton(
-        onClick = onClick,
-        modifier = modifier.size(72.dp),
-        shape = CircleShape,
-        containerColor = AkzentFarbe,
-        contentColor = Color.White
-    ) {
-        Icon(
-            imageVector = Icons.Filled.CameraAlt,
-            contentDescription = "Foto aufnehmen",
-            modifier = Modifier.size(34.dp)
         )
     }
 }

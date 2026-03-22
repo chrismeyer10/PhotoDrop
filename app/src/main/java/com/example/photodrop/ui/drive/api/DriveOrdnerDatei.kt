@@ -1,4 +1,4 @@
-package com.example.photodrop.ui.drive
+package com.example.photodrop.ui.drive.api
 
 // Einzelner Eintrag im Google Drive Ordner (Datei oder Unterordner).
 data class DriveOrdnerDatei(
@@ -14,14 +14,14 @@ data class DriveOrdnerDatei(
     // Gibt an ob dieser Eintrag ein Bild ist.
     val istBild: Boolean get() = mimeType.startsWith("image/")
 
-    // Gibt das passende Icon für diesen Dateityp zurück.
+    // Gibt das passende Icon fuer diesen Dateityp zurueck.
     val icon: String get() = when {
-        istOrdner -> "📁"
-        istBild -> "📷"
-        else -> "📄"
+        istOrdner -> "\uD83D\uDCC1"
+        istBild -> "\uD83D\uDCF7"
+        else -> "\uD83D\uDCC4"
     }
 
-    // Gibt die formatierte Dateigröße zurück (z.B. "1.2 MB").
+    // Gibt die formatierte Dateigroesse zurueck (z.B. "1.2 MB").
     val groesseFormatiert: String get() {
         val bytes = groesse ?: return ""
         return when {
