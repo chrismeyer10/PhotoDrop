@@ -52,6 +52,7 @@ fun DriveScreen(
         onOrdnerAuswaehlen = viewModel::ordnerAuswaehlen,
         onNeuenOrdnerErstellen = viewModel::neuenOrdnerErstellen,
         onOrdnerBestaetigen = viewModel::ordnerBestaetigen,
+        onOrdnerBenennenAbbrechen = viewModel::ordnerBenennenAbbrechen,
         onZuruecksetzen = viewModel::zuruecksetzen,
         onAbmelden = viewModel::abmelden,
         onMenuOeffnen = onMenuOeffnen
@@ -67,6 +68,7 @@ fun DriveInhalt(
     onOrdnerAuswaehlen: (DriveOrdner) -> Unit = {},
     onNeuenOrdnerErstellen: () -> Unit = {},
     onOrdnerBestaetigen: (String) -> Unit = {},
+    onOrdnerBenennenAbbrechen: () -> Unit = {},
     onZuruecksetzen: () -> Unit,
     onAbmelden: () -> Unit = {},
     onMenuOeffnen: () -> Unit = {}
@@ -114,6 +116,7 @@ fun DriveInhalt(
                     onOrdnerAuswaehlen = onOrdnerAuswaehlen,
                     onNeuenOrdnerErstellen = onNeuenOrdnerErstellen,
                     onOrdnerBestaetigen = onOrdnerBestaetigen,
+                    onOrdnerBenennenAbbrechen = onOrdnerBenennenAbbrechen,
                     onZuruecksetzen = onZuruecksetzen
                 )
             }

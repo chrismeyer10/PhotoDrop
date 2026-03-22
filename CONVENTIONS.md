@@ -160,6 +160,14 @@ Scaffold(
 
 ---
 
+## Navigations-Vollstaendigkeit
+
+- **Jeder Screen** muss ueber die Seitenleiste (Menu-Button) oder einen Zurueck-Button verlassbar sein
+- **Jeder Dialog** braucht eine Schliessen- oder Abbrechen-Option und korrektes `onDismissRequest`
+- **Jeder Erstellvorgang** (Ordner erstellen, etc.) braucht eine Abbrechen-Option
+- **Jeder ViewModel-Zustand** muss einen Ausweg haben (Zurueck, Zuruecksetzen oder Fehlerbehandlung)
+- Wird vom `navigations-pruefung` Agent nach jeder Aufgabe geprueft
+
 ## Weitere Konventionen
 
 > Neue Einträge hier einfügen wenn sie während einer Aufgabe erkannt werden.
