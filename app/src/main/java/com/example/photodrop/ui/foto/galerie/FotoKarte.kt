@@ -1,4 +1,4 @@
-package com.example.photodrop.ui.foto
+package com.example.photodrop.ui.foto.galerie
 
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -20,7 +20,6 @@ import com.example.photodrop.ui.theme.KartenFarbe
 import com.example.photodrop.ui.theme.PhotoDropTheme
 
 // Zeigt ein einzelnes Foto als quadratische Karte mit abgerundeten Ecken.
-// Das Bild wird von Coil geladen und füllt die Karte komplett aus (Crop).
 @Composable
 fun FotoKarte(uri: Uri, modifier: Modifier = Modifier) {
     Card(

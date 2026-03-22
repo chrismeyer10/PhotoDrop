@@ -88,16 +88,21 @@ Wann aktualisieren:
 ```
 app/src/main/java/com/example/photodrop/
 ├── agent/
-│   └── AgentService.kt            ← Führt Agents mit Skills als Tools aus
+│   └── AgentService.kt            ← Fuehrt Agents mit Skills als Tools aus
 ├── skills/
-│   ├── Skill.kt                   ← Basis-Typ (typealias für Supplier<String>)
+│   ├── Skill.kt                   ← Basis-Typ (typealias fuer Supplier<String>)
 │   ├── SkillRegistry.kt           ← Registriert alle aktiven Skills
 │   └── GetPhotoInfoSkill.kt       ← Foto-Info-Skill
 └── ui/
     ├── theme/                     ← Farben, Typografie, Theme
     ├── navigation/                ← AppNavigation, NavigationsLeiste, NavigationsZiel
-    ├── foto/                      ← Foto-Aufnahme-Feature
-    └── drive/                     ← Google Drive Verbindungs-Feature
+    ├── foto/                      ← Foto-Aufnahme Screen + ViewModel
+    │   ├── kamera/                ← KameraAusloeser, KameraHilfe, KameraSteuerer
+    │   └── galerie/               ← FotoKarte, FotoListe, Leerzustand
+    └── drive/                     ← DriveScreen + DriveViewModel
+        ├── anmeldung/             ← Google Sign-In Logik
+        ├── api/                   ← DriveVerbindung, Datenmodelle
+        └── zustand/               ← DriveZustand sealed interface + UI-Inhalt
 ```
 
 ## Neuen Agent anlegen

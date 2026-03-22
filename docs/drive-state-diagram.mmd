@@ -1,0 +1,40 @@
+%% PhotoDrop — Drive-Modul State Diagram
+%% Zeigt die Zustaende des Google Drive Features.
+%% Packages: ui.drive, ui.drive.api, ui.drive.anmeldung, ui.drive.zustand
+
+stateDiagram-v2
+    [*] --> NichtVerbunden
+
+    state DriveZustand {
+        [*] --> NichtVerbunden
+        NichtVerbunden --> Verbindet : Anmelden / Auto-Reconnect
+        Verbindet --> OrdnerLaden : Anmeldung OK (kein gespeicherter Ordner)
+        Verbindet --> Verbunden : Anmeldung OK (gespeicherter Ordner)
+        Verbindet --> Fehler : Anmeldung fehlgeschlagen
+        OrdnerLaden --> OrdnerAuswaehlen : Ordner vorhanden
+        OrdnerLaden --> OrdnerBenennen : Keine Ordner im Drive
+        OrdnerAuswaehlen --> Verbunden : Ordner ausgewaehlt
+        OrdnerAuswaehlen --> OrdnerBenennen : Neuen Ordner erstellen
+        OrdnerBenennen --> Verbindet : Ordnername bestaetigt
+        Verbunden --> InhaltGeladen : Ordnerinhalt geladen
+        Verbunden --> NichtVerbunden : Abmelden
+        InhaltGeladen --> NichtVerbunden : Abmelden
+        InhaltGeladen --> InhaltGeladen : Inhalt aktualisieren
+        Fehler --> NichtVerbunden : Zuruecksetzen
+    }
+
+    state DriveAnmeldung {
+        [*] --> KeinKonto
+        KeinKonto --> IntentErstellt : intentErstellen()
+        IntentErstellt --> TokenGeholt : tokenHolen()
+        TokenGeholt --> Abgemeldet : abmelden()
+        Abgemeldet --> KeinKonto
+    }
+
+    state DriveVerbindung_API {
+        [*] --> APIBereit
+        APIBereit --> OrdnerListeGeladen : ordnerListeLaden()
+        APIBereit --> OrdnerGesucht : ordnerSuchen()
+        APIBereit --> OrdnerErstellt : ordnerErstellen()
+        APIBereit --> InhaltGeladen2 : ordnerInhaltLaden()
+    }

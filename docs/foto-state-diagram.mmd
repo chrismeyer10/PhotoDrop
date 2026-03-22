@@ -1,0 +1,41 @@
+%% PhotoDrop — Foto-Modul State Diagram
+%% Zeigt die Zustaende des Foto-Aufnahme-Features.
+%% Packages: ui.foto, ui.foto.kamera, ui.foto.galerie
+
+stateDiagram-v2
+    [*] --> FotoListe
+
+    state FotoAufnahmeScreen {
+        [*] --> FotoListe
+        FotoListe --> OrdnerFehltDialog : Kamera ohne Drive-Ordner
+        FotoListe --> KameraErlaubnisAnfragen : Kamera ohne Erlaubnis
+        FotoListe --> KameraOffen : Kamera mit Erlaubnis + Ordner
+        OrdnerFehltDialog --> FotoListe : Abbrechen
+        OrdnerFehltDialog --> DriveScreen : Zu Drive navigieren
+        KameraErlaubnisAnfragen --> KameraOffen : Erlaubnis erteilt
+        KameraErlaubnisAnfragen --> FotoListe : Erlaubnis verweigert
+        KameraOffen --> FotoListe : Foto gespeichert
+        KameraOffen --> FotoListe : Abgebrochen
+    }
+
+    state FotoListe {
+        [*] --> Leerzustand : Keine Fotos
+        [*] --> GalerieAnzeige : Fotos vorhanden
+        GalerieAnzeige --> GalerieAnzeige : Neues Foto hinzugefuegt
+    }
+
+    state FotoViewModel {
+        [*] --> LeereListe
+        LeereListe --> FotosVorhanden : fotoHinzufuegen()
+        FotosVorhanden --> FotosVorhanden : fotoHinzufuegen()
+    }
+
+    state KameraSteuerer {
+        [*] --> Bereit
+        Bereit --> ErlaubnisAnfragen : Keine Erlaubnis
+        Bereit --> DateiErstellt : Erlaubnis vorhanden
+        ErlaubnisAnfragen --> DateiErstellt : Erteilt
+        DateiErstellt --> KameraGestartet : URI erstellt
+        KameraGestartet --> FotoGemacht : Erfolgreich
+        KameraGestartet --> Bereit : Abgebrochen
+    }

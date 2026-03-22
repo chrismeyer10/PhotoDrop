@@ -1,0 +1,26 @@
+%% PhotoDrop — Navigation State Diagram
+%% Zeigt die App-Navigation und Seitenleiste.
+%% Package: ui.navigation
+
+stateDiagram-v2
+    [*] --> FotoAufnahmeScreen
+
+    state AppNavigation {
+        [*] --> FotoAufnahmeScreen
+
+        state Seitenleiste {
+            [*] --> Geschlossen
+            Geschlossen --> Geoeffnet : Hamburger-Icon
+            Geoeffnet --> Geschlossen : Ziel ausgewaehlt
+            Geoeffnet --> Geschlossen : Ausserhalb tippen
+        }
+
+        FotoAufnahmeScreen --> DriveScreen : Navigation via Drawer
+        FotoAufnahmeScreen --> DriveScreen : OrdnerFehltDialog -> Zu Drive
+        DriveScreen --> FotoAufnahmeScreen : Navigation via Drawer
+    }
+
+    state NavigationsZiel {
+        FotoAufnahme : Route = "fotos"
+        GoogleDrive : Route = "drive"
+    }

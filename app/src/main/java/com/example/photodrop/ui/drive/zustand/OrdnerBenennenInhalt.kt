@@ -1,4 +1,4 @@
-package com.example.photodrop.ui.drive
+package com.example.photodrop.ui.drive.zustand
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,7 +31,7 @@ import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextGedaempft
 import com.example.photodrop.ui.theme.TextHell
 
-// Formular zur Eingabe des Google Drive Ordnernamens nach erfolgreicher Anmeldung.
+// Formular zur Eingabe des Google Drive Ordnernamens.
 @Composable
 fun OrdnerBenennenInhalt(
     kontoName: String,
@@ -45,14 +45,9 @@ fun OrdnerBenennenInhalt(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Filled.CreateNewFolder,
-            contentDescription = null,
-            tint = AkzentFarbe,
-            modifier = Modifier.size(72.dp)
-        )
+        Icon(Icons.Filled.CreateNewFolder, null, tint = AkzentFarbe, modifier = Modifier.size(72.dp))
         Spacer(modifier = Modifier.height(24.dp))
-        Text("Drive-Ordner wählen", color = TextHell, textAlign = TextAlign.Center)
+        Text("Drive-Ordner waehlen", color = TextHell, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(4.dp))
         Text(kontoName, color = TextGedaempft, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(24.dp))
@@ -74,25 +69,20 @@ fun OrdnerBenennenInhalt(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Alle Fotos werden automatisch in\ndiesem Ordner in Google Drive gespeichert.",
-            color = TextGedaempft,
-            textAlign = TextAlign.Center
+            "Alle Fotos werden automatisch in\ndiesem Ordner in Google Drive gespeichert.",
+            color = TextGedaempft, textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(
             onClick = { onBestaetigen(eingabe.trim()) },
             enabled = eingabe.isNotBlank(),
             colors = ButtonDefaults.buttonColors(containerColor = AkzentFarbe)
-        ) {
-            Text("Ordner erstellen")
-        }
+        ) { Text("Ordner erstellen") }
     }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Ordner benennen")
 @Composable
 private fun OrdnerBenennenInhaltVorschau() {
-    PhotoDropTheme {
-        OrdnerBenennenInhalt(kontoName = "max@gmail.com", onBestaetigen = {})
-    }
+    PhotoDropTheme { OrdnerBenennenInhalt(kontoName = "max@gmail.com", onBestaetigen = {}) }
 }

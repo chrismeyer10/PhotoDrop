@@ -1,6 +1,5 @@
-package com.example.photodrop.ui.drive
+package com.example.photodrop.ui.drive.zustand
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.photodrop.ui.drive.api.DriveOrdner
 import com.example.photodrop.ui.theme.AkzentFarbe
 import com.example.photodrop.ui.theme.KartenFarbe
 import com.example.photodrop.ui.theme.OberflächenFarbe
@@ -54,10 +54,13 @@ fun OrdnerAuswaehlenInhalt(
         OrdnerAuswaehlenKopf(zustand.kontoName)
         Spacer(Modifier.height(16.dp))
         zustand.gespeicherterOrdner?.let { gespeichert ->
-            ZuletztVerwendetKarte(gespeichert, onAuswaehlen)
+            OrdnerKarte(ordner = gespeichert, hervorgehoben = true, onAuswaehlen = onAuswaehlen)
             Spacer(Modifier.height(8.dp))
         }
-        OrdnerListeInhalt(zustand.ordner, zustand.gespeicherterOrdner, onAuswaehlen)
+        zustand.ordner.filter { it.id != zustand.gespeicherterOrdner?.id }.forEach { eintrag ->
+            OrdnerKarte(ordner = eintrag, hervorgehoben = false, onAuswaehlen = onAuswaehlen)
+            Spacer(Modifier.height(8.dp))
+        }
         Spacer(Modifier.height(16.dp))
         NeuenOrdnerButton(onNeuErstellen)
         Spacer(Modifier.height(24.dp))
@@ -67,35 +70,12 @@ fun OrdnerAuswaehlenInhalt(
 // Kopfzeile mit Titel und Kontoname.
 @Composable
 private fun OrdnerAuswaehlenKopf(kontoName: String) {
-    Text("Drive-Ordner wählen", color = TextHell, fontSize = 18.sp, fontWeight = FontWeight.Medium)
+    Text("Drive-Ordner waehlen", color = TextHell, fontSize = 18.sp, fontWeight = FontWeight.Medium)
     Spacer(Modifier.height(4.dp))
     Text(kontoName, color = TextGedaempft, fontSize = 13.sp)
 }
 
-// Hebt den zuletzt verwendeten Ordner oben hervor.
-@Composable
-private fun ZuletztVerwendetKarte(ordner: DriveOrdner, onAuswaehlen: (DriveOrdner) -> Unit) {
-    OrdnerKarte(
-        ordner = ordner,
-        hervorgehoben = true,
-        onAuswaehlen = onAuswaehlen
-    )
-}
-
-// Liste aller Ordner — bereits gespeicherter wird oben übersprungen wenn schon als Karte gezeigt.
-@Composable
-private fun OrdnerListeInhalt(
-    ordner: List<DriveOrdner>,
-    gespeichert: DriveOrdner?,
-    onAuswaehlen: (DriveOrdner) -> Unit
-) {
-    ordner.filter { it.id != gespeichert?.id }.forEach { eintrag ->
-        OrdnerKarte(ordner = eintrag, hervorgehoben = false, onAuswaehlen = onAuswaehlen)
-        Spacer(Modifier.height(8.dp))
-    }
-}
-
-// Einzelne Ordner-Karte mit Auswählen-Button.
+// Einzelne Ordner-Karte mit Auswaehlen-Button.
 @Composable
 private fun OrdnerKarte(
     ordner: DriveOrdner,
@@ -115,17 +95,13 @@ private fun OrdnerKarte(
             Icon(Icons.Filled.Folder, null, tint = AkzentFarbe, modifier = Modifier.size(28.dp))
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                if (hervorgehoben) {
-                    Text("Zuletzt verwendet", color = AkzentFarbe, fontSize = 11.sp)
-                }
+                if (hervorgehoben) Text("Zuletzt verwendet", color = AkzentFarbe, fontSize = 11.sp)
                 Text(ordner.name, color = TextHell, fontSize = 15.sp)
             }
             OutlinedButton(
                 onClick = { onAuswaehlen(ordner) },
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = AkzentFarbe)
-            ) {
-                Text("Wählen")
-            }
+            ) { Text("Waehlen") }
         }
     }
 }
@@ -146,34 +122,29 @@ private fun NeuenOrdnerButton(onClick: () -> Unit) {
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Mit Vorschlag")
 @Composable
-private fun OrdnerAuswaehlenInhaltMitVorschlagVorschau() {
+private fun OrdnerAuswaehlenMitVorschlagVorschau() {
     val gespeichert = DriveOrdner("id1", "PhotoDrop")
-    val ordner = listOf(
-        gespeichert,
-        DriveOrdner("id2", "Urlaub 2026"),
-        DriveOrdner("id3", "Dokumente")
-    )
     PhotoDropTheme {
         OrdnerAuswaehlenInhalt(
-            zustand = DriveZustand.OrdnerAuswaehlen("max@gmail.com", "token", ordner, gespeichert),
-            onAuswaehlen = {},
-            onNeuErstellen = {}
+            zustand = DriveZustand.OrdnerAuswaehlen(
+                "max@gmail.com", "token",
+                listOf(gespeichert, DriveOrdner("id2", "Dokumente")), gespeichert
+            ),
+            onAuswaehlen = {}, onNeuErstellen = {}
         )
     }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Ohne Vorschlag")
 @Composable
-private fun OrdnerAuswaehlenInhaltOhneVorschlagVorschau() {
-    val ordner = listOf(
-        DriveOrdner("id2", "Urlaub 2026"),
-        DriveOrdner("id3", "Dokumente")
-    )
+private fun OrdnerAuswaehlenOhneVorschlagVorschau() {
     PhotoDropTheme {
         OrdnerAuswaehlenInhalt(
-            zustand = DriveZustand.OrdnerAuswaehlen("max@gmail.com", "token", ordner, null),
-            onAuswaehlen = {},
-            onNeuErstellen = {}
+            zustand = DriveZustand.OrdnerAuswaehlen(
+                "max@gmail.com", "token",
+                listOf(DriveOrdner("id2", "Dokumente")), null
+            ),
+            onAuswaehlen = {}, onNeuErstellen = {}
         )
     }
 }
