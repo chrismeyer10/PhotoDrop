@@ -14,7 +14,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.photodrop.dokument.DokumentScreen
 import com.example.photodrop.ui.drive.DriveScreen
 import com.example.photodrop.ui.drive.DriveViewModel
-import com.example.photodrop.ui.foto.FotoAufnahmeScreen
 import kotlinx.coroutines.launch
 
 // Haupt-Navigation der App.
@@ -30,9 +29,9 @@ fun AppNavigation() {
 
     val aktuellerEintrag by navController.currentBackStackEntryAsState()
     val aktuelleRoute = aktuellerEintrag?.destination?.route
-        ?: NavigationsZiel.FotoAufnahme.route
+        ?: NavigationsZiel.Archiv.route
 
-    // Linke Seitenleiste umschließt den gesamten Inhalt der App
+    // Linke Seitenleiste umschliesst den gesamten Inhalt der App
     ModalNavigationDrawer(
         drawerState = schubladenZustand,
         drawerContent = {
@@ -42,29 +41,18 @@ fun AppNavigation() {
                     scope.launch { schubladenZustand.close() }
                     navController.navigate(ziel.route) {
                         launchSingleTop = true
-                        popUpTo(NavigationsZiel.FotoAufnahme.route) { inclusive = false }
+                        popUpTo(NavigationsZiel.Archiv.route) { inclusive = false }
                     }
                 }
             )
         }
     ) {
-        // Alle Screens werden hier über Routen gesteuert
+        // Alle Screens werden hier ueber Routen gesteuert
         NavHost(
             navController = navController,
-            startDestination = NavigationsZiel.FotoAufnahme.route
+            startDestination = NavigationsZiel.Archiv.route
         ) {
-            composable(NavigationsZiel.FotoAufnahme.route) {
-                FotoAufnahmeScreen(
-                    driveViewModel = driveViewModel,
-                    onMenuOeffnen = { scope.launch { schubladenZustand.open() } },
-                    onZuDrive = {
-                        navController.navigate(NavigationsZiel.GoogleDrive.route) {
-                            launchSingleTop = true
-                        }
-                    }
-                )
-            }
-            composable(NavigationsZiel.Dokument.route) {
+            composable(NavigationsZiel.Archiv.route) {
                 DokumentScreen(
                     driveViewModel = driveViewModel,
                     onMenuOeffnen = { scope.launch { schubladenZustand.open() } }

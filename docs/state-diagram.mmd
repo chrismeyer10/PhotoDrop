@@ -1,35 +1,26 @@
 %% PhotoDrop — Gesamt State Diagram
 %% Pflege: Bei jeder Aufgabe aktualisieren wenn sich Zustaende, Screens oder Flows aendern.
 %% Zeigt: App-Navigation, Screen-Zustaende, DriveViewModel-Zustaende, AgentService-Zustaende.
-%% Detail-Diagramme: foto-state-diagram.mmd, drive-state-diagram.mmd,
-%%   navigation-state-diagram.mmd, agent-state-diagram.mmd
+%% Detail-Diagramme: drive-state-diagram.mmd, navigation-state-diagram.mmd, agent-state-diagram.mmd
 
 stateDiagram-v2
-    [*] --> FotoAufnahmeScreen
+    [*] --> ArchivScreen
 
-    FotoAufnahmeScreen --> DriveScreen : Drawer / Ordner fehlt
-    FotoAufnahmeScreen --> DokumentScreen : Drawer
-    DriveScreen --> FotoAufnahmeScreen : Drawer
-    DokumentScreen --> FotoAufnahmeScreen : Drawer
-    DokumentScreen --> DriveScreen : Drawer
+    ArchivScreen --> DriveScreen : Drawer
+    DriveScreen --> ArchivScreen : Drawer
 
-    state FotoAufnahmeScreen {
-        [*] --> FotoListe
-        FotoListe --> OrdnerDialog : Kamera ohne Ordner
-        FotoListe --> KameraOffen : Kamera mit Ordner
-        FotoListe --> FotoAnalyseDialog : Foto angetippt
-        OrdnerDialog --> FotoListe : Abbrechen
-        KameraOffen --> FotoListe : Foto gespeichert
-        FotoAnalyseDialog --> FotoListe : Schliessen
-    }
-
-    state FotoAnalyseDialog {
-        [*] --> AnalyseBereit
-        AnalyseBereit --> AnalyseLaeuft : analysieren()
-        AnalyseLaeuft --> AnalyseErgebnis : Erfolg
-        AnalyseLaeuft --> AnalyseFehler : Fehler
-        AnalyseErgebnis --> AnalyseBereit : zuruecksetzen()
-        AnalyseFehler --> AnalyseBereit : zuruecksetzen()
+    state ArchivScreen {
+        [*] --> DokBereit
+        DokBereit --> DokGeladen : Foto / Datei
+        DokGeladen --> DokAnalysiert : analysieren()
+        DokGeladen --> DokBereit : zuruecksetzen()
+        DokAnalysiert --> DokVorschlag : KI-Antwort
+        DokAnalysiert --> DokFehler : Fehler
+        DokVorschlag --> DokHochladen : hochladen()
+        DokHochladen --> DokFertig : Erfolg
+        DokHochladen --> DokFehler : Fehler
+        DokFertig --> DokBereit : zuruecksetzen()
+        DokFehler --> DokBereit : zuruecksetzen()
     }
 
     state DriveScreen {
@@ -48,20 +39,6 @@ stateDiagram-v2
         Verbunden --> InhaltGeladen : Ordnerinhalt geladen
         Verbunden --> NichtVerbunden : Abmelden
         InhaltGeladen --> NichtVerbunden : Abmelden
-    }
-
-    state DokumentScreen {
-        [*] --> DokBereit
-        DokBereit --> DokGeladen : Foto / Datei
-        DokGeladen --> DokAnalysiert : analysieren()
-        DokGeladen --> DokBereit : zuruecksetzen()
-        DokAnalysiert --> DokVorschlag : KI-Antwort
-        DokAnalysiert --> DokFehler : Fehler
-        DokVorschlag --> DokHochladen : hochladen()
-        DokHochladen --> DokFertig : Erfolg
-        DokHochladen --> DokFehler : Fehler
-        DokFertig --> DokBereit : zuruecksetzen()
-        DokFehler --> DokBereit : zuruecksetzen()
     }
 
     state AgentService {
