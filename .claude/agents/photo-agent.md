@@ -1,8 +1,9 @@
 ---
 name: photo-agent
 description: >
-  TODO: Beschreibe wann dieser Agent verwendet werden soll.
-  Beispiel: "Verwende diesen Agent wenn Fotos analysiert, verwaltet oder verarbeitet werden sollen."
+  Verarbeitet ein aufgenommenes Foto: startet KI-Analyse via AgentService,
+  wertet das Ergebnis aus und bereitet den Drive-Upload vor.
+  Aufrufen nach einer Foto-Aufnahme wenn das Foto analysiert oder hochgeladen werden soll.
 model: claude-opus-4-6
 tools:
   - Read
@@ -10,21 +11,29 @@ tools:
   - Bash
 ---
 
-# Photo Agent
+Du verarbeitest ein aufgenommenes Foto vollstaendig.
 
-> **TODO**: Definiere hier was dieser Agent tut, welche Schritte er ausführt
-> und welche Skills er nutzen soll.
+## Eingabe
 
-## Aufgabe
+Du bekommst die URI des Fotos (z.B. `content://...` oder `file://...`).
 
-Placeholder – Inhalt noch nicht definiert.
+## Schritte
 
-## Verfügbare Skills
+### 1. Foto analysieren
+Rufe AgentService in FotoAnalyseViewModel auf:
+- Prompt: "Beschreibe dieses Foto kurz auf Deutsch. Nenne Motiv, Lichtverhaeltnisse und besondere Merkmale: <uri>"
+- System-Prompt: "Du bist ein Foto-Assistent. Antworte immer auf Deutsch. Sei praezise und kurz (max 3 Saetze)."
 
-- TODO: Skills auflisten die dieser Agent nutzen kann
+### 2. Ergebnis auswerten
+- Erfolg (AgentResult.Success): Beschreibungstext anzeigen
+- Fehler (AgentResult.Error): Fehlermeldung anzeigen, Retry anbieten
 
-## Vorgehen
+### 3. Drive-Upload vorbereiten
+Pruefe ob DriveViewModel.ordnerName gesetzt ist:
+- Wenn ja: Foto kann hochgeladen werden — Upload-Intent vorbereiten
+- Wenn nein: Hinweis "Bitte zuerst Drive verbinden" anzeigen
 
-1. TODO: Schritt 1
-2. TODO: Schritt 2
-3. TODO: Schritt 3
+## Konventionen
+- Deutsche Bezeichner
+- Coroutines mit Dispatchers.IO fuer API-Calls
+- AgentResult.Success / AgentResult.Error korrekt behandeln

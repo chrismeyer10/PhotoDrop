@@ -12,12 +12,14 @@ fun ZustandInhaltAuswaehlen(
     onNeuenOrdnerErstellen: () -> Unit,
     onOrdnerBestaetigen: (String) -> Unit,
     onOrdnerBenennenAbbrechen: () -> Unit = {},
-    onZuruecksetzen: () -> Unit
+    onZuruecksetzen: () -> Unit,
+    onLadeAbbrechen: () -> Unit = {},
+    onOrdnerWechseln: () -> Unit = {}
 ) {
     when (zustand) {
         is DriveZustand.NichtVerbunden -> NichtVerbundenInhalt(onVerbinden)
-        is DriveZustand.Verbindet -> LadeInhalt()
-        is DriveZustand.OrdnerLaden -> LadeInhalt()
+        is DriveZustand.Verbindet -> LadeInhalt(onAbbrechen = onLadeAbbrechen)
+        is DriveZustand.OrdnerLaden -> LadeInhalt(onAbbrechen = onLadeAbbrechen)
         is DriveZustand.OrdnerAuswaehlen -> OrdnerAuswaehlenInhalt(
             zustand = zustand,
             onAuswaehlen = onOrdnerAuswaehlen,
@@ -29,7 +31,10 @@ fun ZustandInhaltAuswaehlen(
             onAbbrechen = onOrdnerBenennenAbbrechen
         )
         is DriveZustand.Verbunden -> VerbundenAnimiertInhalt(zustand)
-        is DriveZustand.InhaltGeladen -> OrdnerInhaltInhalt(zustand)
+        is DriveZustand.InhaltGeladen -> OrdnerInhaltInhalt(
+            zustand = zustand,
+            onOrdnerWechseln = onOrdnerWechseln
+        )
         is DriveZustand.Fehler -> FehlerInhalt(zustand.meldung, onZuruecksetzen)
     }
 }

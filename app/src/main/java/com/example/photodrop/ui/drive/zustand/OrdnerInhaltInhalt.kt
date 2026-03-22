@@ -1,12 +1,19 @@
 package com.example.photodrop.ui.drive.zustand
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -14,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.photodrop.ui.drive.api.DriveOrdnerDatei
+import com.example.photodrop.ui.theme.AkzentFarbe
 import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextGedaempft
 
@@ -25,14 +33,17 @@ private val TerminalMeta = Color(0xFF4EC9B0)
 
 // Zeigt den Ordnerinhalt in einer Terminal-aehnlichen Tree-Struktur.
 @Composable
-fun OrdnerInhaltInhalt(zustand: DriveZustand.InhaltGeladen) {
+fun OrdnerInhaltInhalt(
+    zustand: DriveZustand.InhaltGeladen,
+    onOrdnerWechseln: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        OrdnerKopfzeile(zustand.kontoName)
+        OrdnerKopfzeile(zustand.kontoName, onOrdnerWechseln)
         if (zustand.dateien.isEmpty()) {
             OrdnerLeerHinweis()
         } else {
@@ -41,19 +52,32 @@ fun OrdnerInhaltInhalt(zustand: DriveZustand.InhaltGeladen) {
     }
 }
 
-// Kopfzeile mit Ordner-Symbol und Kontoname.
+// Kopfzeile mit Ordner-Symbol, Kontoname und Wechsel-Button.
 @Composable
-private fun OrdnerKopfzeile(kontoName: String) {
-    Text(
-        "\uD83D\uDCC1  Drive-Ordner", color = TerminalGruen,
-        fontFamily = FontFamily.Monospace, fontSize = 14.sp,
-        modifier = Modifier.padding(bottom = 4.dp)
-    )
-    Text(
-        "    $kontoName", color = TextGedaempft,
-        fontFamily = FontFamily.Monospace, fontSize = 12.sp,
-        modifier = Modifier.padding(bottom = 12.dp)
-    )
+private fun OrdnerKopfzeile(kontoName: String, onOrdnerWechseln: () -> Unit = {}) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                "\uD83D\uDCC1  Drive-Ordner", color = TerminalGruen,
+                fontFamily = FontFamily.Monospace, fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+            Text(
+                "    $kontoName", color = TextGedaempft,
+                fontFamily = FontFamily.Monospace, fontSize = 12.sp,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+        }
+        IconButton(onClick = onOrdnerWechseln) {
+            Icon(
+                Icons.Filled.SwapHoriz, "Ordner wechseln",
+                tint = AkzentFarbe, modifier = Modifier.size(24.dp)
+            )
+        }
+    }
 }
 
 // Hinweis wenn der Ordner leer ist.

@@ -11,16 +11,22 @@ stateDiagram-v2
         Verbindet --> OrdnerLaden : Anmeldung OK (kein gespeicherter Ordner)
         Verbindet --> Verbunden : Anmeldung OK (gespeicherter Ordner)
         Verbindet --> Fehler : Anmeldung fehlgeschlagen
+        Verbindet --> NichtVerbunden : Abbrechen
         OrdnerLaden --> OrdnerAuswaehlen : Ordner vorhanden
         OrdnerLaden --> OrdnerBenennen : Keine Ordner im Drive
+        OrdnerLaden --> NichtVerbunden : Abbrechen
         OrdnerAuswaehlen --> Verbunden : Ordner ausgewaehlt
         OrdnerAuswaehlen --> OrdnerBenennen : Neuen Ordner erstellen
         OrdnerBenennen --> Verbindet : Ordnername bestaetigt
+        OrdnerBenennen --> NichtVerbunden : Abbrechen (keine vorhandene Liste)
+        OrdnerBenennen --> OrdnerAuswaehlen : Abbrechen (vorhandene Liste)
         Verbunden --> InhaltGeladen : Ordnerinhalt geladen
         Verbunden --> NichtVerbunden : Abmelden
         InhaltGeladen --> NichtVerbunden : Abmelden
         InhaltGeladen --> InhaltGeladen : Inhalt aktualisieren
-        Fehler --> NichtVerbunden : Zuruecksetzen
+        InhaltGeladen --> OrdnerAuswaehlen : Ordner wechseln
+        Fehler --> NichtVerbunden : Zuruecksetzen (kein Konto)
+        Fehler --> OrdnerAuswaehlen : Erneut versuchen (Konto vorhanden)
     }
 
     state DriveAnmeldung {

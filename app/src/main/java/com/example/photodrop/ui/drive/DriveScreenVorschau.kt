@@ -11,20 +11,27 @@ import com.example.photodrop.ui.theme.PhotoDropTheme
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Nicht verbunden")
 @Composable
 private fun DriveInhaltNichtVerbundenVorschau() {
-    PhotoDropTheme { DriveInhalt(DriveZustand.NichtVerbunden, {}, {}, {}, {}, {}, {}) }
+    PhotoDropTheme {
+        DriveInhalt(DriveZustand.NichtVerbunden, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+    }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Verbindet")
 @Composable
 private fun DriveInhaltVerbindetVorschau() {
-    PhotoDropTheme { DriveInhalt(DriveZustand.Verbindet, {}, {}, {}, {}, {}, {}) }
+    PhotoDropTheme {
+        DriveInhalt(DriveZustand.Verbindet, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+    }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Verbunden")
 @Composable
 private fun DriveInhaltVerbundenVorschau() {
     PhotoDropTheme {
-        DriveInhalt(DriveZustand.Verbunden("max@gmail.com", "abc123"), {}, {}, {}, {}, {}, {})
+        DriveInhalt(
+            DriveZustand.Verbunden("max@gmail.com", "abc123"),
+            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+        )
     }
 }
 
@@ -36,7 +43,7 @@ private fun DriveInhaltGeladenVorschau() {
             DriveZustand.InhaltGeladen(
                 "max@gmail.com", "abc123",
                 listOf(DriveOrdnerDatei("1", "foto.jpg", "image/jpeg", 1_200_000, "2026-03-21"))
-            ), {}, {}, {}, {}, {}, {}
+            ), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
         )
     }
 }
@@ -45,6 +52,9 @@ private fun DriveInhaltGeladenVorschau() {
 @Composable
 private fun DriveInhaltFehlerVorschau() {
     PhotoDropTheme {
-        DriveInhalt(DriveZustand.Fehler("Anmeldung fehlgeschlagen: 12500"), {}, {}, {}, {}, {}, {})
+        DriveInhalt(
+            DriveZustand.Fehler("Anmeldung fehlgeschlagen: 12500"),
+            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+        )
     }
 }
