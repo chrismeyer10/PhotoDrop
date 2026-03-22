@@ -86,11 +86,73 @@ git add <nur geänderte Dateien — niemals git add .>
 git commit -m "<typ>: <kurze deutsche Beschreibung>"
 ```
 
-### 9. PR erstellen und mergen → Skill: /github-pr
+### 9. PR erstellen und mergen (direkt via GitHub API — kein gh CLI nötig)
+
+**Schritt 9a: Token holen**
+```bash
+git credential fill <<'EOF'
+protocol=https
+host=github.com
+EOF
 ```
-Branch pushen: git push -u origin <branch>
-Dann /github-pr aufrufen — er erstellt und mergt den PR automatisch
+Das gibt `username` und `password` (= GitHub Token) aus.
+
+**Schritt 9b: Branch pushen**
+```bash
+git push -u origin <branch-name>
 ```
+
+**Schritt 9c: PR erstellen und squash-mergen via Node.js**
+```bash
+node -e "
+const https = require('https');
+const TOKEN = '<token-aus-schritt-9a>';
+const REPO  = 'chrismeyer10/PhotoDrop';
+
+function apiCall(path, method, body) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify(body);
+    const req = https.request({
+      hostname: 'api.github.com',
+      path: '/repos/' + REPO + path,
+      method,
+      headers: {
+        'Authorization': 'token ' + TOKEN,
+        'User-Agent': 'node',
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data)
+      }
+    }, res => {
+      let out = '';
+      res.on('data', d => out += d);
+      res.on('end', () => resolve(JSON.parse(out)));
+    });
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
+
+(async () => {
+  const pr = await apiCall('/pulls', 'POST', {
+    title: '<Titel>',
+    head: '<branch-name>',
+    base: 'main',
+    body: '<Beschreibung>'
+  });
+  console.log('PR:', pr.html_url, 'Nr:', pr.number);
+  if (!pr.number) { console.error(JSON.stringify(pr)); return; }
+
+  const merge = await apiCall('/pulls/' + pr.number + '/merge', 'PUT', {
+    merge_method: 'squash'
+  });
+  console.log(merge.merged ? 'Gemergt ✅' : merge.message);
+})();
+"
+```
+
+**Wichtig:** `<token-aus-schritt-9a>`, `<titel>`, `<branch-name>` und `<beschreibung>` durch echte Werte ersetzen.
+Wenn der PR bereits existiert (422-Fehler): PR-Nummer direkt über die API abrufen und mergen.
 
 ### 10. main synchronisieren
 ```bash
@@ -110,3 +172,4 @@ Wenn du eine **neue Konvention** erkennst → in `CONVENTIONS.md` eintragen.
 - Kein Commit ohne grünen Build (build-check ist Pflicht)
 - PR immer squash-mergen
 - Keine halbfertigen Zustände committen
+- `/github-pr` Skill NICHT verwenden — stattdessen immer direkt die GitHub API via Node.js aufrufen (siehe Schritt 9)
