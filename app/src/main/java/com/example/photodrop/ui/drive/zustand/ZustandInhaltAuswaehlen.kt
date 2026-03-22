@@ -11,6 +11,7 @@ fun ZustandInhaltAuswaehlen(
     onOrdnerAuswaehlen: (DriveOrdner) -> Unit,
     onNeuenOrdnerErstellen: () -> Unit,
     onOrdnerBestaetigen: (String) -> Unit,
+    onOrdnerBenennenAbbrechen: () -> Unit = {},
     onZuruecksetzen: () -> Unit
 ) {
     when (zustand) {
@@ -24,7 +25,8 @@ fun ZustandInhaltAuswaehlen(
         )
         is DriveZustand.OrdnerBenennen -> OrdnerBenennenInhalt(
             kontoName = zustand.kontoName,
-            onBestaetigen = onOrdnerBestaetigen
+            onBestaetigen = onOrdnerBestaetigen,
+            onAbbrechen = onOrdnerBenennenAbbrechen
         )
         is DriveZustand.Verbunden -> VerbundenAnimiertInhalt(zustand)
         is DriveZustand.InhaltGeladen -> OrdnerInhaltInhalt(zustand)

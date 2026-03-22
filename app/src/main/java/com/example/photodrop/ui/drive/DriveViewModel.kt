@@ -93,6 +93,19 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         _zustand.value = DriveZustand.OrdnerBenennen(aktuell.kontoName, aktuell.token)
     }
 
+    // Wechselt vom Ordner-Benennen zurueck zur Ordner-Auswahl.
+    fun ordnerBenennenAbbrechen() {
+        val aktuell = _zustand.value as? DriveZustand.OrdnerBenennen ?: return
+        _zustand.value = DriveZustand.Verbindet
+        viewModelScope.launch {
+            val konto = DriveAnmeldung.letztesKontoHolen(getApplication()) ?: run {
+                _zustand.value = DriveZustand.NichtVerbunden
+                return@launch
+            }
+            ordnerListeAnzeigen(konto)
+        }
+    }
+
     // Waehlt einen bestehenden Ordner aus.
     fun ordnerAuswaehlen(ordner: DriveOrdner) {
         val aktuell = _zustand.value as? DriveZustand.OrdnerAuswaehlen ?: return

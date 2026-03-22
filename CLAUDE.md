@@ -14,9 +14,10 @@ Der Koordinator führt diese Schritte aus:
 4. **`build-check` Agent** — `./gradlew compileDebugKotlin` muss grün sein
 5. **`code-cleanup` Agent** — tote Imports, Duplikate, veralteter Code entfernen
 6. **`struktur-check` Agent** — wenn neue Dateien entstanden sind (prüft auch @Preview)
-7. **`docs/state-diagram.mmd` aktualisieren** — wenn Zustände, Screens oder Flows geändert wurden
-8. Committen und PR erstellen/mergen via `/github-pr` Skill
-9. `main` synchronisieren
+7. **`navigations-pruefung` Agent** — prueft Sackgassen, fehlende Zurueck-Optionen, Zustandsluecken
+8. **`docs/state-diagram.mmd` aktualisieren** — wenn Zustände, Screens oder Flows geändert wurden
+9. Committen und PR erstellen/mergen via `/github-pr` Skill
+10. `main` synchronisieren
 
 ## Git-Workflow
 
@@ -58,6 +59,7 @@ Agents sind spezialisierte Claude-Instanzen für komplexe, mehrstufige Aufgaben.
 | `build-check` | `compileDebugKotlin` ausführen und Fehler reparieren | Nach jeder Code-Änderung, vor Commit |
 | `code-cleanup` | Tote Imports, Duplikate, veralteten Code entfernen | Nach Implementierung, vor Struktur-Check |
 | `struktur-check` | Paketstruktur, Dateigröße, @Preview-Vollständigkeit prüfen | Nach Aufgaben mit neuen Dateien |
+| `navigations-pruefung` | Prueft Screens auf Sackgassen, fehlende Zurueck/Abbrechen-Optionen, unvollstaendige Zustandsuebergaenge — behebt direkt | Nach jeder Aufgabe (nach struktur-check) |
 | `figma-agent` | Figma-Designs abrufen und in Compose-Code umwandeln | Wenn ein Design aus Figma implementiert wird |
 
 ## Skills (`/.claude/skills/`)

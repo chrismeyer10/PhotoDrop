@@ -38,6 +38,7 @@ stateDiagram-v2
         OrdnerAuswaehlen --> Verbunden : Ordner ausgewaehlt
         OrdnerAuswaehlen --> OrdnerBenennen : Neuen Ordner erstellen
         OrdnerBenennen --> Verbindet : Bestaetigen
+        OrdnerBenennen --> OrdnerLaden : Abbrechen
         Verbindet --> Verbunden : Auto-Reconnect mit Ordner
         Verbindet --> DriveFehler : Fehler
         DriveFehler --> NichtVerbunden : Zuruecksetzen

@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +37,7 @@ import com.example.photodrop.ui.theme.TextHell
 fun OrdnerBenennenInhalt(
     kontoName: String,
     onBestaetigen: (name: String) -> Unit,
+    onAbbrechen: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var eingabe by rememberSaveable { mutableStateOf("PhotoDrop") }
@@ -78,6 +80,10 @@ fun OrdnerBenennenInhalt(
             enabled = eingabe.isNotBlank(),
             colors = ButtonDefaults.buttonColors(containerColor = AkzentFarbe)
         ) { Text("Ordner erstellen") }
+        Spacer(modifier = Modifier.height(8.dp))
+        TextButton(onClick = onAbbrechen) {
+            Text("Abbrechen", color = TextGedaempft)
+        }
     }
 }
 
