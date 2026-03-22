@@ -1,0 +1,35 @@
+package com.example.photodrop.dokument
+
+import android.graphics.Bitmap
+import android.net.Uri
+
+// Moegliche Zustaende des Dokument-Archiv-Flows.
+sealed interface DokumentZustand {
+
+    // Startbereit — kein Dokument geladen.
+    object Bereit : DokumentZustand
+
+    // Dokument wurde geladen und ist bereit zur Analyse.
+    data class Geladen(val uri: Uri, val vorschau: Bitmap?) : DokumentZustand
+
+    // KI analysiert das Dokument.
+    object Analysiert : DokumentZustand
+
+    // KI-Vorschlag liegt vor — User kann anpassen.
+    data class VorschlagBereit(
+        val uri: Uri,
+        val vorschau: Bitmap?,
+        val dateiname: String,
+        val unterordner: String,
+        val begruendung: String
+    ) : DokumentZustand
+
+    // Datei wird hochgeladen.
+    object LaeadtHoch : DokumentZustand
+
+    // Upload erfolgreich abgeschlossen.
+    data class Fertig(val dateiname: String, val unterordner: String) : DokumentZustand
+
+    // Fehlerzustand mit Meldung.
+    data class Fehler(val meldung: String) : DokumentZustand
+}

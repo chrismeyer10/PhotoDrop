@@ -1,0 +1,15 @@
+%% Dokument-Archiv State Diagram
+%% Zeigt den Zustandsfluss fuer das Dokument-Archiv-Feature.
+
+stateDiagram-v2
+    [*] --> Bereit
+    Bereit --> Geladen : Foto aufgenommen / Datei gewaehlt
+    Geladen --> Analysiert : analysieren()
+    Geladen --> Bereit : zuruecksetzen()
+    Analysiert --> VorschlagBereit : KI-Antwort erhalten
+    Analysiert --> Fehler : KI-Fehler
+    VorschlagBereit --> LaeadtHoch : hochladen()
+    LaeadtHoch --> Fertig : Upload erfolgreich
+    LaeadtHoch --> Fehler : Upload-Fehler
+    Fertig --> Bereit : zuruecksetzen()
+    Fehler --> Bereit : zuruecksetzen()
