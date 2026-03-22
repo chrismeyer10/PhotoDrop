@@ -12,6 +12,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +29,9 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
     private val _zustand = MutableStateFlow<DriveZustand>(DriveZustand.NichtVerbunden)
     val zustand: StateFlow<DriveZustand> = _zustand
 
+    // Aktueller Lade-Job, damit er bei Abbruch gecancelt werden kann.
+    private var ladeJob: Job? = null
+
     // Gespeicherter Ordnername fuer andere ViewModels.
     val ordnerName: String? get() = ordnerPrefs.ordnerName
 
@@ -37,7 +41,7 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
     private fun automatischVerbinden() {
         val konto = DriveAnmeldung.letztesKontoHolen(getApplication()) ?: return
         _zustand.value = DriveZustand.Verbindet
-        viewModelScope.launch {
+        ladeJob = viewModelScope.launch {
             val name = ordnerPrefs.ordnerName
             val id = ordnerPrefs.ordnerId
             if (name != null && id != null) {
@@ -57,7 +61,7 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
             val ordner = DriveVerbindung.ordnerListeLaden(token)
             val gespeichert = ordner.find { it.id == ordnerPrefs.ordnerId }
             _zustand.value = if (ordner.isEmpty()) {
-                DriveZustand.OrdnerBenennen(kontoName, token)
+                DriveZustand.OrdnerBenennen(kontoName, token, hatVorhandeneListe = false)
             } else {
                 DriveZustand.OrdnerAuswaehlen(kontoName, token, ordner, gespeichert)
             }
@@ -67,7 +71,9 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Stellt die Verbindung mit gespeichertem Ordner her.
-    private suspend fun tokenHolenUndVerbinden(konto: GoogleSignInAccount, name: String, id: String) {
+    private suspend fun tokenHolenUndVerbinden(
+        konto: GoogleSignInAccount, name: String, id: String
+    ) {
         try {
             val token = DriveAnmeldung.tokenHolen(getApplication(), konto)
             val kontoName = konto.email ?: konto.displayName ?: ""
@@ -79,7 +85,9 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Laedt den Ordnerinhalt mit Mindest-Anzeigezeit.
-    private suspend fun ordnerInhaltLaden(token: String, kontoName: String, ordnerId: String) {
+    private suspend fun ordnerInhaltLaden(
+        token: String, kontoName: String, ordnerId: String
+    ) {
         val startZeit = System.currentTimeMillis()
         val dateien = DriveVerbindung.ordnerInhaltLaden(token, ordnerId)
         val vergangen = System.currentTimeMillis() - startZeit
@@ -87,22 +95,36 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         _zustand.value = DriveZustand.InhaltGeladen(kontoName, ordnerId, dateien)
     }
 
+    // Bricht den aktuellen Ladevorgang ab.
+    fun ladeAbbrechen() {
+        ladeJob?.cancel()
+        ladeJob = null
+        _zustand.value = DriveZustand.NichtVerbunden
+    }
+
     // Wechselt zum Neuen-Ordner-Formular.
     fun neuenOrdnerErstellen() {
         val aktuell = _zustand.value as? DriveZustand.OrdnerAuswaehlen ?: return
-        _zustand.value = DriveZustand.OrdnerBenennen(aktuell.kontoName, aktuell.token)
+        _zustand.value = DriveZustand.OrdnerBenennen(
+            aktuell.kontoName, aktuell.token, hatVorhandeneListe = true
+        )
     }
 
-    // Wechselt vom Ordner-Benennen zurueck zur Ordner-Auswahl.
+    // Wechselt vom Ordner-Benennen zurueck — je nach Kontext.
     fun ordnerBenennenAbbrechen() {
         val aktuell = _zustand.value as? DriveZustand.OrdnerBenennen ?: return
-        _zustand.value = DriveZustand.Verbindet
-        viewModelScope.launch {
-            val konto = DriveAnmeldung.letztesKontoHolen(getApplication()) ?: run {
-                _zustand.value = DriveZustand.NichtVerbunden
-                return@launch
+        if (!aktuell.hatVorhandeneListe) {
+            DriveAnmeldung.abmelden(getApplication()) {}
+            _zustand.value = DriveZustand.NichtVerbunden
+        } else {
+            _zustand.value = DriveZustand.Verbindet
+            ladeJob = viewModelScope.launch {
+                val konto = DriveAnmeldung.letztesKontoHolen(getApplication()) ?: run {
+                    _zustand.value = DriveZustand.NichtVerbunden
+                    return@launch
+                }
+                ordnerListeAnzeigen(konto)
             }
-            ordnerListeAnzeigen(konto)
         }
     }
 
@@ -111,23 +133,41 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         val aktuell = _zustand.value as? DriveZustand.OrdnerAuswaehlen ?: return
         ordnerPrefs.speichern(ordner.name, ordner.id)
         _zustand.value = DriveZustand.Verbunden(aktuell.kontoName, ordner.id, aktuell.token)
-        viewModelScope.launch { ordnerInhaltLaden(aktuell.token, aktuell.kontoName, ordner.id) }
+        viewModelScope.launch {
+            ordnerInhaltLaden(aktuell.token, aktuell.kontoName, ordner.id)
+        }
     }
 
     // Erstellt einen neuen Ordner in Drive.
     fun ordnerBestaetigen(name: String) {
         val aktuell = _zustand.value as? DriveZustand.OrdnerBenennen ?: return
         _zustand.value = DriveZustand.Verbindet
-        viewModelScope.launch {
+        ladeJob = viewModelScope.launch {
             val ordnerId = DriveVerbindung.ordnerSicherstellen(aktuell.token, name)
             if (ordnerId != null) {
                 ordnerPrefs.speichern(name, ordnerId)
-                _zustand.value = DriveZustand.Verbunden(aktuell.kontoName, ordnerId, aktuell.token)
+                _zustand.value = DriveZustand.Verbunden(
+                    aktuell.kontoName, ordnerId, aktuell.token
+                )
                 ordnerInhaltLaden(aktuell.token, aktuell.kontoName, ordnerId)
             } else {
-                _zustand.value = DriveZustand.Fehler("Ordner konnte nicht erstellt werden.")
+                _zustand.value = DriveZustand.Fehler(
+                    "Ordner konnte nicht erstellt werden.",
+                    aktuell.kontoName, aktuell.token
+                )
             }
         }
+    }
+
+    // Wechselt den verbundenen Ordner — laedt Ordnerliste neu.
+    fun ordnerWechseln() {
+        ordnerPrefs.loeschen()
+        val konto = DriveAnmeldung.letztesKontoHolen(getApplication()) ?: run {
+            _zustand.value = DriveZustand.NichtVerbunden
+            return
+        }
+        _zustand.value = DriveZustand.Verbindet
+        ladeJob = viewModelScope.launch { ordnerListeAnzeigen(konto) }
     }
 
     // Erstellt den Sign-In Intent.
@@ -136,7 +176,7 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
     // Verarbeitet das Sign-In Ergebnis.
     fun anmeldeErgebnisVerarbeiten(daten: Intent?) {
         _zustand.value = DriveZustand.Verbindet
-        viewModelScope.launch {
+        ladeJob = viewModelScope.launch {
             try {
                 val konto = withContext(Dispatchers.IO) {
                     GoogleSignIn.getSignedInAccountFromIntent(daten)
@@ -144,10 +184,33 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 ordnerListeAnzeigen(konto)
             } catch (e: ApiException) {
-                _zustand.value = DriveZustand.Fehler("Anmeldung fehlgeschlagen: ${e.statusCode}")
+                _zustand.value = DriveZustand.Fehler(
+                    "Anmeldung fehlgeschlagen: ${e.statusCode}"
+                )
             } catch (e: Exception) {
-                _zustand.value = DriveZustand.Fehler(e.message ?: "Unbekannter Fehler")
+                _zustand.value = DriveZustand.Fehler(
+                    e.message ?: "Unbekannter Fehler"
+                )
             }
+        }
+    }
+
+    // Versucht den Fehler zu beheben — mit Retry wenn Token vorhanden.
+    fun fehlerBeheben() {
+        val aktuell = _zustand.value as? DriveZustand.Fehler ?: return
+        val token = aktuell.token
+        val kontoName = aktuell.kontoName
+        if (token != null && kontoName != null) {
+            _zustand.value = DriveZustand.Verbindet
+            ladeJob = viewModelScope.launch {
+                val konto = DriveAnmeldung.letztesKontoHolen(getApplication()) ?: run {
+                    _zustand.value = DriveZustand.NichtVerbunden
+                    return@launch
+                }
+                ordnerListeAnzeigen(konto)
+            }
+        } else {
+            _zustand.value = DriveZustand.NichtVerbunden
         }
     }
 

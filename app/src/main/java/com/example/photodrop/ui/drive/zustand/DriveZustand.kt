@@ -20,7 +20,11 @@ sealed interface DriveZustand {
     ) : DriveZustand
 
     // Warten auf Ordnername-Eingabe fuer neuen Ordner.
-    data class OrdnerBenennen(val kontoName: String, val token: String) : DriveZustand
+    data class OrdnerBenennen(
+        val kontoName: String,
+        val token: String,
+        val hatVorhandeneListe: Boolean = false
+    ) : DriveZustand
 
     // Ordner verbunden — zeigt Bereit-Animation.
     data class Verbunden(val kontoName: String, val ordnerId: String, val token: String = "") : DriveZustand
@@ -32,5 +36,10 @@ sealed interface DriveZustand {
         val dateien: List<DriveOrdnerDatei>
     ) : DriveZustand
 
-    data class Fehler(val meldung: String) : DriveZustand
+    // Fehlerzustand mit optionalen Konto-Infos fuer Retry.
+    data class Fehler(
+        val meldung: String,
+        val kontoName: String? = null,
+        val token: String? = null
+    ) : DriveZustand
 }

@@ -53,9 +53,11 @@ fun DriveScreen(
         onNeuenOrdnerErstellen = viewModel::neuenOrdnerErstellen,
         onOrdnerBestaetigen = viewModel::ordnerBestaetigen,
         onOrdnerBenennenAbbrechen = viewModel::ordnerBenennenAbbrechen,
-        onZuruecksetzen = viewModel::zuruecksetzen,
+        onZuruecksetzen = viewModel::fehlerBeheben,
         onAbmelden = viewModel::abmelden,
-        onMenuOeffnen = onMenuOeffnen
+        onMenuOeffnen = onMenuOeffnen,
+        onLadeAbbrechen = viewModel::ladeAbbrechen,
+        onOrdnerWechseln = viewModel::ordnerWechseln
     )
 }
 
@@ -71,7 +73,9 @@ fun DriveInhalt(
     onOrdnerBenennenAbbrechen: () -> Unit = {},
     onZuruecksetzen: () -> Unit,
     onAbmelden: () -> Unit = {},
-    onMenuOeffnen: () -> Unit = {}
+    onMenuOeffnen: () -> Unit = {},
+    onLadeAbbrechen: () -> Unit = {},
+    onOrdnerWechseln: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -117,7 +121,9 @@ fun DriveInhalt(
                     onNeuenOrdnerErstellen = onNeuenOrdnerErstellen,
                     onOrdnerBestaetigen = onOrdnerBestaetigen,
                     onOrdnerBenennenAbbrechen = onOrdnerBenennenAbbrechen,
-                    onZuruecksetzen = onZuruecksetzen
+                    onZuruecksetzen = onZuruecksetzen,
+                    onLadeAbbrechen = onLadeAbbrechen,
+                    onOrdnerWechseln = onOrdnerWechseln
                 )
             }
         }

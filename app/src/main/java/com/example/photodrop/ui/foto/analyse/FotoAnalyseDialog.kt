@@ -27,6 +27,7 @@ fun FotoAnalyseDialog(
     zustand: FotoAnalyseZustand,
     onSchliessen: () -> Unit
 ) {
+    val buttonText = if (zustand is FotoAnalyseZustand.Laeuft) "Abbrechen" else "Schliessen"
     AlertDialog(
         onDismissRequest = onSchliessen,
         containerColor = OberflächenFarbe,
@@ -34,7 +35,7 @@ fun FotoAnalyseDialog(
         text = { FotoAnalyseInhalt(zustand) },
         confirmButton = {
             TextButton(onClick = onSchliessen) {
-                Text("Schliessen", color = AkzentFarbe)
+                Text(buttonText, color = AkzentFarbe)
             }
         }
     )
