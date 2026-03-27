@@ -15,7 +15,11 @@ stateDiagram-v2
         DokGeladen --> DokAnalysiert : analysieren()
         DokGeladen --> DokBereit : zuruecksetzen()
         DokAnalysiert --> DokVorschlag : KI-Antwort
-        DokAnalysiert --> DokFehler : Fehler
+        DokAnalysiert --> DokAnalyseFehler : KI-Fehler
+        DokAnalyseFehler --> DokManuellBenennen : trotzdemSpeichern()
+        DokAnalyseFehler --> DokBereit : zuruecksetzen()
+        DokManuellBenennen --> DokHochladen : hochladen()
+        DokManuellBenennen --> DokBereit : zuruecksetzen()
         DokVorschlag --> DokHochladen : hochladen()
         DokHochladen --> DokFertig : Erfolg
         DokHochladen --> DokFehler : Fehler
