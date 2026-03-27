@@ -36,12 +36,7 @@ jobs:
           restore-keys: gradle-
 
       - name: local.properties erstellen
-        run: |
-          echo "sdk.dir=$ANDROID_SDK_ROOT" >> local.properties
-          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> local.properties
-
-      - name: google-services.json wiederherstellen
-        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > app/google-services.json
+        run: echo "sdk.dir=$ANDROID_SDK_ROOT" >> local.properties
 
       - name: Debug APK bauen
         run: ./gradlew assembleDebug --no-daemon
