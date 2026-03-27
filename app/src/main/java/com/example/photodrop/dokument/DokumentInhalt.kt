@@ -31,6 +31,7 @@ fun DokumentInhalt(
     onDateiAuswaehlen: () -> Unit = {},
     onAnalysieren: () -> Unit = {},
     onHochladen: (String, String) -> Unit = { _, _ -> },
+    onTrotzdemSpeichern: () -> Unit = {},
     onZuruecksetzen: () -> Unit = {},
     onMenuOeffnen: () -> Unit = {}
 ) {
