@@ -53,6 +53,7 @@ fun DokumentScreen(
                 viewModel.hochladen(name, ordner, token, ordnerId)
             }
         },
+        onTrotzdemSpeichern = { viewModel.trotzdemSpeichern() },
         onZuruecksetzen = { viewModel.zuruecksetzen() },
         onMenuOeffnen = onMenuOeffnen
     )

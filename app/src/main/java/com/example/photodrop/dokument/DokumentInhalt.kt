@@ -31,6 +31,7 @@ fun DokumentInhalt(
     onDateiAuswaehlen: () -> Unit = {},
     onAnalysieren: () -> Unit = {},
     onHochladen: (String, String) -> Unit = { _, _ -> },
+    onTrotzdemSpeichern: () -> Unit = {},
     onZuruecksetzen: () -> Unit = {},
     onMenuOeffnen: () -> Unit = {}
 ) {
@@ -51,7 +52,7 @@ fun DokumentInhalt(
         containerColor = AppHintergrund
     ) { innenAbstand ->
         Column(modifier = Modifier.padding(innenAbstand).fillMaxSize()) {
-            ZustandsWeiche(zustand, onFotografieren, onDateiAuswaehlen, onAnalysieren, onHochladen, onZuruecksetzen)
+            ZustandsWeiche(zustand, onFotografieren, onDateiAuswaehlen, onAnalysieren, onHochladen, onTrotzdemSpeichern, onZuruecksetzen)
         }
     }
 }
@@ -64,6 +65,7 @@ private fun ZustandsWeiche(
     onDateiAuswaehlen: () -> Unit,
     onAnalysieren: () -> Unit,
     onHochladen: (String, String) -> Unit,
+    onTrotzdemSpeichern: () -> Unit,
     onZuruecksetzen: () -> Unit
 ) {
     when (zustand) {
@@ -73,6 +75,16 @@ private fun ZustandsWeiche(
         is DokumentZustand.VorschlagBereit -> VorschlagInhalt(zustand, onHochladen, onZuruecksetzen)
         is DokumentZustand.LaeadtHoch -> VorschlagLadeInhalt(text = "Wird hochgeladen...")
         is DokumentZustand.Fertig -> DokumentFertigInhalt(zustand.dateiname, zustand.unterordner, onZuruecksetzen)
+        is DokumentZustand.AnalyseFehler -> DokumentAnalyseFehlerInhalt(
+            meldung = zustand.meldung,
+            onTrotzdemSpeichern = onTrotzdemSpeichern,
+            onZurueck = onZuruecksetzen
+        )
+        is DokumentZustand.ManuellBenennen -> DokumentManuellBenennenInhalt(
+            zustand = zustand,
+            onHochladen = onHochladen,
+            onZurueck = onZuruecksetzen
+        )
         is DokumentZustand.Fehler -> DokumentFehlerInhalt(zustand.meldung, onZuruecksetzen)
     }
 }
@@ -81,6 +93,20 @@ private fun ZustandsWeiche(
 @Composable
 private fun DokumentInhaltBereitVorschau() {
     PhotoDropTheme { DokumentInhalt(zustand = DokumentZustand.Bereit) }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "AnalyseFehler")
+@Composable
+private fun DokumentInhaltAnalyseFehlerVorschau() {
+    PhotoDropTheme {
+        DokumentInhalt(
+            zustand = DokumentZustand.AnalyseFehler(
+                meldung = "Die KI-Analyse ist voruebergehend nicht verfuegbar.",
+                uri = android.net.Uri.EMPTY,
+                vorschau = null
+            )
+        )
+    }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Fehler")

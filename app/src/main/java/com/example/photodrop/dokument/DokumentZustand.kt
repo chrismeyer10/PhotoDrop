@@ -30,6 +30,16 @@ sealed interface DokumentZustand {
     // Upload erfolgreich abgeschlossen.
     data class Fertig(val dateiname: String, val unterordner: String) : DokumentZustand
 
+    // KI-Analyse fehlgeschlagen — Dokument kann trotzdem gespeichert werden.
+    data class AnalyseFehler(
+        val meldung: String,
+        val uri: Uri,
+        val vorschau: Bitmap?
+    ) : DokumentZustand
+
+    // Manuelles Benennen — User gibt Dateiname und Unterordner selbst ein.
+    data class ManuellBenennen(val uri: Uri, val vorschau: Bitmap?) : DokumentZustand
+
     // Fehlerzustand mit Meldung.
     data class Fehler(val meldung: String) : DokumentZustand
 }

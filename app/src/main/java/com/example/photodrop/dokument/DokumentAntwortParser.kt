@@ -8,7 +8,11 @@ import org.json.JSONObject
 // Verarbeitet die KI-Antwort und gibt den passenden Zustand zurueck.
 fun ergebnisVerarbeiten(ergebnis: AgentResult, uri: Uri, vorschau: Bitmap?): DokumentZustand {
     return when (ergebnis) {
-        is AgentResult.Error -> DokumentZustand.Fehler(ergebnis.message)
+        is AgentResult.Error -> DokumentZustand.AnalyseFehler(
+            meldung = fehlerUebersetzen(ergebnis.message),
+            uri = uri,
+            vorschau = vorschau
+        )
         is AgentResult.Success -> jsonAntwortParsieren(ergebnis.text, uri, vorschau)
     }
 }

@@ -62,6 +62,14 @@ class DokumentViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    // Wechselt zum manuellen Benennungs-Zustand nach Analyse-Fehler.
+    fun trotzdemSpeichern() {
+        _zustand.value = DokumentZustand.ManuellBenennen(
+            uri = aktuelleUri ?: Uri.EMPTY,
+            vorschau = aktuelleVorschau
+        )
+    }
+
     // Laedt das Dokument in Google Drive hoch.
     fun hochladen(dateiname: String, unterordner: String, token: String, ordnerId: String) {
         _zustand.value = DokumentZustand.LaeadtHoch
