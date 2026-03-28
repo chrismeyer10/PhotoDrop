@@ -20,7 +20,8 @@ import com.example.photodrop.ui.foto.kamera.dateiUriErstellen
 fun DokumentScreen(
     viewModel: DokumentViewModel = viewModel(),
     driveViewModel: DriveViewModel = viewModel(),
-    onMenuOeffnen: () -> Unit = {}
+    onMenuOeffnen: () -> Unit = {},
+    onEinstellungenOeffnen: () -> Unit = {}
 ) {
     val zustand by viewModel.zustand.collectAsState()
     val driveZustand by driveViewModel.zustand.collectAsState()
@@ -54,6 +55,8 @@ fun DokumentScreen(
             }
         },
         onTrotzdemSpeichern = { viewModel.trotzdemSpeichern() },
+        onOcrAnalysieren = { viewModel.ocrAnalysieren() },
+        onEinstellungenOeffnen = onEinstellungenOeffnen,
         onZuruecksetzen = { viewModel.zuruecksetzen() },
         onMenuOeffnen = onMenuOeffnen
     )

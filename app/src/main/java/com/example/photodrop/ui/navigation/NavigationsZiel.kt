@@ -3,6 +3,7 @@ package com.example.photodrop.ui.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 // Alle Navigationsziele der App als typsichere Objekte.
@@ -17,4 +18,7 @@ sealed class NavigationsZiel(
 
     // Screen fuer die Google Drive Verbindung
     object GoogleDrive : NavigationsZiel("drive", "Google Drive", Icons.Filled.CloudSync)
+
+    // Screen fuer API-Schluessel und App-Einstellungen
+    object Einstellungen : NavigationsZiel("einstellungen", "Einstellungen", Icons.Filled.Settings)
 }

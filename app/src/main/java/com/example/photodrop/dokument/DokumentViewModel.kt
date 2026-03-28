@@ -6,9 +6,9 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.photodrop.BuildConfig
 import com.example.photodrop.agent.AgentService
 import com.example.photodrop.ui.drive.api.DriveVerbindung
+import com.example.photodrop.ui.einstellungen.ApiSchluesselHelfer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +20,6 @@ class DokumentViewModel(application: Application) : AndroidViewModel(application
     private val verlauf = DokumentVerlauf(
         application.getSharedPreferences("dokument_verlauf", 0)
     )
-    private val agentService = AgentService(BuildConfig.ANTHROPIC_API_KEY)
 
     private val _zustand = MutableStateFlow<DokumentZustand>(DokumentZustand.Bereit)
     val zustand: StateFlow<DokumentZustand> = _zustand
@@ -47,18 +46,49 @@ class DokumentViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // Startet die KI-Analyse des geladenen Dokuments.
+    // Startet die KI-Analyse — verwendet gespeicherten oder BuildConfig-Key.
     fun analysieren() {
         val bytes = aktuelleBildBytes ?: return
+        val app: Application = getApplication()
+        val schluessel = ApiSchluesselHelfer.aktivenSchluesselHolen(app)
+        if (schluessel == null) {
+            _zustand.value = DokumentZustand.AnalyseFehler(
+                meldung = "Kein API-Schluessel vorhanden. Bitte in Einstellungen eintragen oder kostenlose OCR nutzen.",
+                uri = aktuelleUri ?: Uri.EMPTY,
+                vorschau = aktuelleVorschau
+            )
+            return
+        }
         _zustand.value = DokumentZustand.Analysiert
         aktuellerJob = viewModelScope.launch {
-            val ergebnis = agentService.run(
+            val ergebnis = AgentService(schluessel).run(
                 prompt = "Analysiere dieses Dokument und schlage einen Dateinamen und Unterordner vor.",
                 systemPrompt = systemPromptBauen(verlauf),
                 bild = bytes,
                 bildMimeType = "image/jpeg"
             )
             _zustand.value = ergebnisVerarbeiten(ergebnis, aktuelleUri ?: Uri.EMPTY, aktuelleVorschau)
+        }
+    }
+
+    // Startet kostenlose OCR-Analyse mit ML Kit (kein API-Key noetig).
+    fun ocrAnalysieren() {
+        val uri = aktuelleUri ?: return
+        _zustand.value = DokumentZustand.Analysiert
+        aktuellerJob = viewModelScope.launch {
+            try {
+                val text = MlKitTextErkennung.textErkennen(uri, getApplication())
+                val dateiname = dateinameAusOcrText(text)
+                _zustand.value = DokumentZustand.VorschlagBereit(
+                    uri = uri,
+                    vorschau = aktuelleVorschau,
+                    dateiname = dateiname,
+                    unterordner = "Dokumente",
+                    begruendung = "Aus Texterkennung (OCR) — bitte Dateinamen pruefen."
+                )
+            } catch (e: Exception) {
+                _zustand.value = DokumentZustand.ManuellBenennen(uri, aktuelleVorschau)
+            }
         }
     }
 
@@ -95,5 +125,11 @@ class DokumentViewModel(application: Application) : AndroidViewModel(application
         aktuelleUri = null
         aktuelleVorschau = null
         _zustand.value = DokumentZustand.Bereit
+    }
+
+    // Erstellt einen Dateinamen aus dem ersten Satz des OCR-Textes.
+    private fun dateinameAusOcrText(text: String): String {
+        val ersteZeile = text.lines().firstOrNull { it.isNotBlank() }?.take(40) ?: "Dokument"
+        return ersteZeile.replace(Regex("[^A-Za-z0-9äöüÄÖÜß _-]"), "").trim().ifBlank { "Dokument" }
     }
 }
