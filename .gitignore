@@ -25,4 +25,4 @@
 local.properties
 .claude/settings.local.json
 .claude/settings.json
-app/google-services.json
+# google-services.json wird bewusst NICHT ignoriert -- muss ins Repo committed werden
