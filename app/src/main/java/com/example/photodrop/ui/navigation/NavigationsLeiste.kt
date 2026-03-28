@@ -34,7 +34,7 @@ fun NavigationsLeisteInhalt(
     onZielAusgewaehlt: (NavigationsZiel) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val ziele = listOf(NavigationsZiel.Archiv, NavigationsZiel.GoogleDrive)
+    val ziele = listOf(NavigationsZiel.Archiv, NavigationsZiel.GoogleDrive, NavigationsZiel.Einstellungen)
 
     Column(
         modifier = modifier

@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.photodrop.dokument.DokumentScreen
 import com.example.photodrop.ui.drive.DriveScreen
 import com.example.photodrop.ui.drive.DriveViewModel
+import com.example.photodrop.ui.einstellungen.EinstellungenScreen
 import kotlinx.coroutines.launch
 
 // Haupt-Navigation der App.
@@ -55,12 +56,22 @@ fun AppNavigation() {
             composable(NavigationsZiel.Archiv.route) {
                 DokumentScreen(
                     driveViewModel = driveViewModel,
-                    onMenuOeffnen = { scope.launch { schubladenZustand.open() } }
+                    onMenuOeffnen = { scope.launch { schubladenZustand.open() } },
+                    onEinstellungenOeffnen = {
+                        navController.navigate(NavigationsZiel.Einstellungen.route) {
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
             composable(NavigationsZiel.GoogleDrive.route) {
                 DriveScreen(
                     viewModel = driveViewModel,
+                    onMenuOeffnen = { scope.launch { schubladenZustand.open() } }
+                )
+            }
+            composable(NavigationsZiel.Einstellungen.route) {
+                EinstellungenScreen(
                     onMenuOeffnen = { scope.launch { schubladenZustand.open() } }
                 )
             }

@@ -32,6 +32,8 @@ fun DokumentInhalt(
     onAnalysieren: () -> Unit = {},
     onHochladen: (String, String) -> Unit = { _, _ -> },
     onTrotzdemSpeichern: () -> Unit = {},
+    onOcrAnalysieren: () -> Unit = {},
+    onEinstellungenOeffnen: () -> Unit = {},
     onZuruecksetzen: () -> Unit = {},
     onMenuOeffnen: () -> Unit = {}
 ) {
@@ -52,7 +54,10 @@ fun DokumentInhalt(
         containerColor = AppHintergrund
     ) { innenAbstand ->
         Column(modifier = Modifier.padding(innenAbstand).fillMaxSize()) {
-            ZustandsWeiche(zustand, onFotografieren, onDateiAuswaehlen, onAnalysieren, onHochladen, onTrotzdemSpeichern, onZuruecksetzen)
+            ZustandsWeiche(
+                zustand, onFotografieren, onDateiAuswaehlen, onAnalysieren,
+                onHochladen, onTrotzdemSpeichern, onOcrAnalysieren, onEinstellungenOeffnen, onZuruecksetzen
+            )
         }
     }
 }
@@ -66,6 +71,8 @@ private fun ZustandsWeiche(
     onAnalysieren: () -> Unit,
     onHochladen: (String, String) -> Unit,
     onTrotzdemSpeichern: () -> Unit,
+    onOcrAnalysieren: () -> Unit,
+    onEinstellungenOeffnen: () -> Unit,
     onZuruecksetzen: () -> Unit
 ) {
     when (zustand) {
@@ -77,6 +84,8 @@ private fun ZustandsWeiche(
         is DokumentZustand.Fertig -> DokumentFertigInhalt(zustand.dateiname, zustand.unterordner, onZuruecksetzen)
         is DokumentZustand.AnalyseFehler -> DokumentAnalyseFehlerInhalt(
             meldung = zustand.meldung,
+            onOcrAnalysieren = onOcrAnalysieren,
+            onEinstellungenOeffnen = onEinstellungenOeffnen,
             onTrotzdemSpeichern = onTrotzdemSpeichern,
             onZurueck = onZuruecksetzen
         )
@@ -101,7 +110,7 @@ private fun DokumentInhaltAnalyseFehlerVorschau() {
     PhotoDropTheme {
         DokumentInhalt(
             zustand = DokumentZustand.AnalyseFehler(
-                meldung = "Die KI-Analyse ist voruebergehend nicht verfuegbar.",
+                meldung = "Kontoguthaben erschoepft.",
                 uri = android.net.Uri.EMPTY,
                 vorschau = null
             )
