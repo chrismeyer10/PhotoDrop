@@ -9,9 +9,9 @@ object ApiSchluesselSpeicher {
     private const val PREFS_NAME = "api_einstellungen"
     private const val SCHLUESSEL_KEY = "anthropic_api_key"
 
-    // Speichert den API-Schluessel in SharedPreferences.
+    // Speichert den API-Schluessel in SharedPreferences (ohne fuehrende/nachfolgende Leerzeichen).
     fun speichern(context: Context, schluessel: String) {
-        prefs(context).edit().putString(SCHLUESSEL_KEY, schluessel).apply()
+        prefs(context).edit().putString(SCHLUESSEL_KEY, schluessel.trim()).apply()
     }
 
     // Liest den gespeicherten API-Schluessel oder gibt null zurueck.

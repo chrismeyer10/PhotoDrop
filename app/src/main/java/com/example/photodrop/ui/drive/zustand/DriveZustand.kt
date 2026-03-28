@@ -33,7 +33,8 @@ sealed interface DriveZustand {
     data class InhaltGeladen(
         val kontoName: String,
         val ordnerId: String,
-        val dateien: List<DriveOrdnerDatei>
+        val dateien: List<DriveOrdnerDatei>,
+        val token: String = ""
     ) : DriveZustand
 
     // Fehlerzustand mit optionalen Konto-Infos fuer Retry.
