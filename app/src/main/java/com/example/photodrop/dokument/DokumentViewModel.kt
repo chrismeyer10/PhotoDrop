@@ -127,9 +127,25 @@ class DokumentViewModel(application: Application) : AndroidViewModel(application
         _zustand.value = DokumentZustand.Bereit
     }
 
-    // Erstellt einen Dateinamen aus dem ersten Satz des OCR-Textes.
+    // Erstellt einen sinnvollen Dateinamen aus dem OCR-Text.
+    // Bevorzugt Zeilen mit mehreren Woertern gegenueber reinen Zahlen/Daten.
     private fun dateinameAusOcrText(text: String): String {
-        val ersteZeile = text.lines().firstOrNull { it.isNotBlank() }?.take(40) ?: "Dokument"
-        return ersteZeile.replace(Regex("[^A-Za-z0-9äöüÄÖÜß _-]"), "").trim().ifBlank { "Dokument" }
+        val zeilen = text.lines()
+            .map { it.trim() }
+            .filter { it.length >= 5 && it.any { c -> c.isLetter() } }
+
+        val aussagekraeftig = zeilen.firstOrNull { zeile ->
+            val woerter = zeile.split(Regex("\\s+"))
+                .filter { it.length >= 3 && it.any { c -> c.isLetter() } }
+            woerter.size >= 2
+        } ?: zeilen.firstOrNull() ?: "Dokument"
+
+        return aussagekraeftig
+            .replace(Regex("[^A-Za-z0-9äöüÄÖÜß _-]"), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+            .take(40)
+            .trimEnd()
+            .ifBlank { "Dokument" }
     }
 }

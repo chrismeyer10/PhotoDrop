@@ -92,7 +92,7 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         val dateien = DriveVerbindung.ordnerInhaltLaden(token, ordnerId)
         val vergangen = System.currentTimeMillis() - startZeit
         if (vergangen < MINDEST_ANZEIGEZEIT_MS) delay(MINDEST_ANZEIGEZEIT_MS - vergangen)
-        _zustand.value = DriveZustand.InhaltGeladen(kontoName, ordnerId, dateien)
+        _zustand.value = DriveZustand.InhaltGeladen(kontoName, ordnerId, dateien, token)
     }
 
     // Bricht den aktuellen Ladevorgang ab.

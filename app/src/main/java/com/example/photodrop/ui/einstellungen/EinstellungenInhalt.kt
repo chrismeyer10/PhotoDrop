@@ -39,6 +39,7 @@ import com.example.photodrop.ui.theme.TextHell
 fun EinstellungenInhalt(
     schluessel: String,
     istGespeichert: Boolean,
+    testLaeuft: Boolean = false,
     onSchluesselAendern: (String) -> Unit = {},
     onSpeichern: () -> Unit = {},
     onLoeschen: () -> Unit = {},
@@ -63,6 +64,7 @@ fun EinstellungenInhalt(
         EinstellungenFormular(
             schluessel = schluessel,
             istGespeichert = istGespeichert,
+            testLaeuft = testLaeuft,
             onSchluesselAendern = onSchluesselAendern,
             onSpeichern = onSpeichern,
             onLoeschen = onLoeschen,
@@ -76,6 +78,7 @@ fun EinstellungenInhalt(
 private fun EinstellungenFormular(
     schluessel: String,
     istGespeichert: Boolean,
+    testLaeuft: Boolean,
     onSchluesselAendern: (String) -> Unit,
     onSpeichern: () -> Unit,
     onLoeschen: () -> Unit,
@@ -110,7 +113,7 @@ private fun EinstellungenFormular(
             )
         )
         Spacer(modifier = Modifier.height(16.dp))
-        SchluesselButtons(schluessel, istGespeichert, onSpeichern, onLoeschen)
+        SchluesselButtons(schluessel, istGespeichert, testLaeuft, onSpeichern, onLoeschen)
     }
 }
 
@@ -119,15 +122,16 @@ private fun EinstellungenFormular(
 private fun SchluesselButtons(
     schluessel: String,
     istGespeichert: Boolean,
+    testLaeuft: Boolean,
     onSpeichern: () -> Unit,
     onLoeschen: () -> Unit
 ) {
     Button(
         onClick = onSpeichern,
-        enabled = schluessel.isNotBlank(),
+        enabled = schluessel.isNotBlank() && !testLaeuft,
         modifier = Modifier.fillMaxWidth().height(56.dp),
         colors = ButtonDefaults.buttonColors(containerColor = AkzentFarbe)
-    ) { Text("Speichern") }
+    ) { Text(if (testLaeuft) "Verbindung wird geprueft..." else "Speichern & Verbindung testen") }
 
     if (istGespeichert) {
         Spacer(modifier = Modifier.height(12.dp))
