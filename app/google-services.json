@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1030208549990",
+    "project_id": "photodrop-1be48",
+    "storage_bucket": "photodrop-1be48.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1030208549990:android:2e72a95bd62eef2f85a9a7",
+        "android_client_info": {
+          "package_name": "com.example.photodrop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaUgF3BkdpLaoRyLl5q3G5WeKfSqQShPg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
