@@ -15,7 +15,7 @@ import java.util.function.Supplier
 
 // Fuehrt einen Claude-Agent mit Skills (Tools) aus.
 // Unterstuetzt optionale Bild-Eingabe fuer multimodale Analyse.
-class AgentService(apiKey: String) {
+class AgentService(private val apiKey: String) : KiDienst {
 
     private val client: AnthropicClient = AnthropicOkHttpClient.builder()
         .apiKey(apiKey)
@@ -31,7 +31,7 @@ class AgentService(apiKey: String) {
     ): AgentResult = withContext(Dispatchers.IO) {
         try {
             val paramsBauer = MessageCreateParams.builder()
-                .model("claude-opus-4-6")
+                .model("claude-sonnet-4-20250514")
                 .maxTokens(16000L)
 
             if (bild != null) {
@@ -53,9 +53,17 @@ class AgentService(apiKey: String) {
             }
             AgentResult.Success(ausgabe.toString())
         } catch (e: Exception) {
-            AgentResult.Error(e.message ?: "Unbekannter Fehler", e)
+            AgentResult.Error(fehlerBereinigen(e), e)
         }
     }
+
+    // Implementierung der KiDienst-Schnittstelle.
+    override suspend fun analysieren(
+        prompt: String,
+        systemPrompt: String?,
+        bild: ByteArray?,
+        bildMimeType: String?
+    ): AgentResult = run(prompt = prompt, systemPrompt = systemPrompt, bild = bild, bildMimeType = bildMimeType)
 
     // Baut eine multimodale Nachricht mit Bild und Text.
     private fun bildNachrichtBauen(
@@ -89,6 +97,24 @@ class AgentService(apiKey: String) {
             "image/gif" -> BetaBase64ImageSource.MediaType.IMAGE_GIF
             "image/webp" -> BetaBase64ImageSource.MediaType.IMAGE_WEBP
             else -> BetaBase64ImageSource.MediaType.IMAGE_JPEG
+        }
+    }
+
+    // Bereinigt die Fehlermeldung und unterscheidet Fehlertypen genauer.
+    private fun fehlerBereinigen(e: Exception): String {
+        val meldung = e.message ?: return "Unbekannter Fehler"
+        val name = e.javaClass.simpleName
+        // Anthropic SDK wirft spezifische Exceptions — Klassenname hilft
+        return when {
+            "AuthenticationException" in name || "401" in meldung ->
+                "API-Schluessel ungueltig [401]. Bitte pruefen."
+            "PermissionDeniedException" in name || "403" in meldung ->
+                "Zugriff verweigert [403]. API-Schluessel hat keine Berechtigung."
+            "RateLimitException" in name || "429" in meldung ->
+                "Zu viele Anfragen [429]. Bitte kurz warten."
+            "InternalServerException" in name || "500" in meldung ->
+                "Anthropic-Server-Fehler [500]. Bitte spaeter erneut versuchen."
+            else -> meldung
         }
     }
 }
