@@ -38,21 +38,28 @@ stateDiagram-v2
         Verbindet --> OrdnerLaden : Anmeldung OK
         OrdnerLaden --> OrdnerAuswaehlen : Ordner vorhanden
         OrdnerLaden --> OrdnerBenennen : Keine Ordner
-        OrdnerAuswaehlen --> Verbunden : Ordner ausgewaehlt
+        OrdnerAuswaehlen --> InhaltGeladen : Ordner ausgewaehlt (navigationsStack leer)
         OrdnerAuswaehlen --> OrdnerBenennen : Neuen Ordner erstellen
         OrdnerAuswaehlen --> NichtVerbunden : Abmelden
         OrdnerBenennen --> Verbindet : Bestaetigen
         OrdnerBenennen --> OrdnerLaden : Abbrechen
         OrdnerBenennen --> NichtVerbunden : Abmelden
         OrdnerLaden --> NichtVerbunden : Abmelden
-        Verbindet --> Verbunden : Auto-Reconnect mit Ordner
+        Verbindet --> InhaltGeladen : Auto-Reconnect mit Ordner
         Verbindet --> DriveFehler : Fehler
         DriveFehler --> NichtVerbunden : Zuruecksetzen
-        Verbunden --> InhaltGeladen : Ordnerinhalt geladen
-        Verbunden --> NichtVerbunden : Abmelden
         InhaltGeladen --> NichtVerbunden : Abmelden
+        InhaltGeladen --> InhaltGeladen : inOrdnerNavigieren() (Unterordner oeffnen)
+        InhaltGeladen --> InhaltGeladen : zurueckNavigieren() (Breadcrumb zurueck)
         InhaltGeladen --> InhaltGeladen : inhaltNeuLaden() (nach Upload)
         DriveInhaltNeuLaden --> InhaltGeladen : Dateiliste aktualisiert
+
+        state "InhaltGeladen" as InhaltGeladen {
+            [*] --> RootAnsicht
+            RootAnsicht --> UnterordnerAnsicht : Ordner antippen
+            UnterordnerAnsicht --> RootAnsicht : Breadcrumb Zurueck (letzter Schritt)
+            UnterordnerAnsicht --> UnterordnerAnsicht : Tiefer navigieren
+        }
     }
 
     state EinstellungenScreen {
@@ -83,10 +90,18 @@ stateDiagram-v2
         [*] --> SchnellBereit
         SchnellBereit --> SchnellFotoNehmen : Foto-Button (Kamera-Erlaubnis OK)
         SchnellBereit --> SchnellOrdnerWaehlen : Ordner-Button
-        SchnellFotoNehmen --> SchnellUploadLaedt : Foto aufgenommen
+        SchnellFotoNehmen --> OrdnerAuswahlDialog : Foto aufgenommen
+        OrdnerAuswahlDialog --> SchnellUploadLaedt : Ordner ausgewaehlt
+        OrdnerAuswahlDialog --> SchnellBereit : Abbrechen
         SchnellUploadLaedt --> SchnellUploadFertig : Upload Erfolg
         SchnellUploadLaedt --> SchnellUploadFehler : Upload Fehler
         SchnellUploadFertig --> SchnellBereit : Overlay ausgeblendet (auto)
         SchnellUploadFehler --> SchnellBereit : zuruecksetzen()
         SchnellOrdnerWaehlen --> DriveScreen : Navigation
+
+        state DriveViewModel {
+            [*] --> OrdnerNichtGewaehlt
+            OrdnerNichtGewaehlt --> AktiverOrdnerGesetzt : aktivenOrdnerSetzen()
+            AktiverOrdnerGesetzt --> AktiverOrdnerGesetzt : aktivenOrdnerSetzen() (aendern)
+        }
     }

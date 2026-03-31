@@ -7,6 +7,8 @@ import com.example.photodrop.ui.drive.api.DriveOrdner
 @Composable
 fun ZustandInhaltAuswaehlen(
     zustand: DriveZustand,
+    navigationsStack: List<DriveOrdner> = emptyList(),
+    aktiverOrdner: DriveOrdner? = null,
     onVerbinden: () -> Unit,
     onOrdnerAuswaehlen: (DriveOrdner) -> Unit,
     onNeuenOrdnerErstellen: () -> Unit,
@@ -14,7 +16,10 @@ fun ZustandInhaltAuswaehlen(
     onOrdnerBenennenAbbrechen: () -> Unit = {},
     onZuruecksetzen: () -> Unit,
     onLadeAbbrechen: () -> Unit = {},
-    onOrdnerWechseln: () -> Unit = {}
+    onOrdnerWechseln: () -> Unit = {},
+    onOrdnerOeffnen: (DriveOrdner) -> Unit = {},
+    onOrdnerAlsZielSetzen: (DriveOrdner) -> Unit = {},
+    onZurueckNavigieren: () -> Unit = {}
 ) {
     when (zustand) {
         is DriveZustand.NichtVerbunden -> NichtVerbundenInhalt(onVerbinden)
@@ -33,6 +38,11 @@ fun ZustandInhaltAuswaehlen(
         is DriveZustand.Verbunden -> VerbundenAnimiertInhalt(zustand)
         is DriveZustand.InhaltGeladen -> OrdnerInhaltInhalt(
             zustand = zustand,
+            navigationsStack = navigationsStack,
+            aktiverOrdner = aktiverOrdner,
+            onOrdnerOeffnen = onOrdnerOeffnen,
+            onOrdnerAlsZielSetzen = onOrdnerAlsZielSetzen,
+            onZurueckNavigieren = onZurueckNavigieren,
             onOrdnerWechseln = onOrdnerWechseln
         )
         is DriveZustand.Fehler -> FehlerInhalt(zustand.meldung, onZuruecksetzen)
