@@ -33,4 +33,14 @@ object MlKitTextErkennung {
             ergebnis.text
         }
     }
+
+    // Extrahiert Text direkt aus einem Bitmap (z.B. gerenderter PDF-Seite).
+    suspend fun textAusBitmapErkennen(bitmap: android.graphics.Bitmap): String {
+        return withContext(Dispatchers.IO) {
+            val bild = InputImage.fromBitmap(bitmap, 0)
+            val erkenner = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+            val ergebnis = erkenner.process(bild).await()
+            ergebnis.text
+        }
+    }
 }

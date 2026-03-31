@@ -8,20 +8,42 @@ import java.time.LocalDate
 object DokumentSchnellAnalyse {
 
     // Analysiert das Dokument und gibt Dateiname- und Drive-Pfad-Vorschlag zurueck.
+    // Strategie: PDF-Metadaten > OCR erste Seite > Dateiname > Fallback.
     suspend fun analysieren(uri: Uri, context: Context): SchnellAnalyseErgebnis {
-        val dateiname = dateinameErmitteln(uri, context)
         val ocrText = ocrTextHolen(uri, context)
+        val dateiname = dateinameErmitteln(uri, context, ocrText)
         val drivePfad = drivePfadErmitteln(dateiname, ocrText)
         return SchnellAnalyseErgebnis(dateiname, drivePfad)
     }
 
-    // Ermittelt den bereinigten Dateinamen: PDF-Metadaten > Dateiname > Fallback.
-    private fun dateinameErmitteln(uri: Uri, context: Context): String {
+    // Ermittelt den bereinigten Dateinamen: PDF-Metadaten > OCR-Titel > Dateiname > Fallback.
+    private fun dateinameErmitteln(uri: Uri, context: Context, ocrText: String): String {
         val ausMetadaten = pdfTitelAusMetadaten(uri, context)
         if (!ausMetadaten.isNullOrBlank()) return ausMetadaten.trim().take(60)
+        val ausOcr = titelAusOcrText(ocrText)
+        if (!ausOcr.isNullOrBlank()) return ausOcr
         val ausdateiname = dateinameAusUri(uri, context)
         if (!ausdateiname.isNullOrBlank()) return ausdateiname
         return "Dokument_${LocalDate.now()}"
+    }
+
+    // Extrahiert den Titel aus dem OCR-Text: erste sinnvolle, nicht zu kurze Zeile.
+    // Seitenzahlen und reine Zahlenwerte werden uebersprungen.
+    private fun titelAusOcrText(text: String): String? {
+        if (text.isBlank()) return null
+        return text.lines()
+            .map { it.trim() }
+            .filter { zeile ->
+                zeile.length >= 8
+                    && zeile.any { it.isLetter() }
+                    && !zeile.matches(Regex("^[0-9\\s.,:/-]+$"))
+            }
+            .firstOrNull()
+            ?.replace(Regex("[^A-Za-z0-9äöüÄÖÜß _-]"), " ")
+            ?.replace(Regex("\\s+"), " ")
+            ?.trim()
+            ?.take(50)
+            ?.ifBlank { null }
     }
 
     // Liest den Anzeigenamen aus PDF-Metadaten und bereinigt ihn.
@@ -68,9 +90,18 @@ object DokumentSchnellAnalyse {
     }
 
     // Versucht OCR-Text aus dem Dokument zu lesen (schlaegt lautlos fehl).
+    // Fuer PDFs: erste Seite als Bitmap rendern, dann OCR drauf.
+    // Fuer Bilder: direkt per URI-Pfad.
     private suspend fun ocrTextHolen(uri: Uri, context: Context): String {
+        val mimeType = context.contentResolver.getType(uri)
         return try {
-            MlKitTextErkennung.textErkennen(uri, context)
+            if (mimeType == "application/pdf") {
+                val bitmap = DokumentLeser.pdfVorschauErstellen(uri, context)
+                    ?: return ""
+                MlKitTextErkennung.textAusBitmapErkennen(bitmap)
+            } else {
+                MlKitTextErkennung.textErkennen(uri, context)
+            }
         } catch (_: Exception) {
             ""
         }

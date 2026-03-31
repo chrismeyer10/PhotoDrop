@@ -78,3 +78,15 @@ stateDiagram-v2
         Erfolgreich --> Bereit
         AgentFehler --> Bereit
     }
+
+    state SchnellAktionsLeiste {
+        [*] --> SchnellBereit
+        SchnellBereit --> SchnellFotoNehmen : Foto-Button (Kamera-Erlaubnis OK)
+        SchnellBereit --> SchnellOrdnerWaehlen : Ordner-Button
+        SchnellFotoNehmen --> SchnellUploadLaedt : Foto aufgenommen
+        SchnellUploadLaedt --> SchnellUploadFertig : Upload Erfolg
+        SchnellUploadLaedt --> SchnellUploadFehler : Upload Fehler
+        SchnellUploadFertig --> SchnellBereit : Overlay ausgeblendet (auto)
+        SchnellUploadFehler --> SchnellBereit : zuruecksetzen()
+        SchnellOrdnerWaehlen --> DriveScreen : Navigation
+    }

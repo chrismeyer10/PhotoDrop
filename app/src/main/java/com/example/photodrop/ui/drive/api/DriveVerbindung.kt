@@ -97,25 +97,30 @@ object DriveVerbindung {
         return aktuelleId
     }
 
-    // Laedt den Inhalt eines Drive-Ordners.
+    // Laedt den Inhalt eines Drive-Ordners (alle Dateien direkt im Ordner).
+    // pageSize=1000 stellt sicher dass auch groessere Ordner vollstaendig geladen werden.
     suspend fun ordnerInhaltLaden(token: String, ordnerId: String): List<DriveOrdnerDatei> =
         withContext(Dispatchers.IO) {
             try {
                 val abfrage = URLEncoder.encode(
                     "'$ordnerId' in parents and trashed=false", "UTF-8"
                 )
-                val felder = "files(id,name,mimeType,size,modifiedTime)"
-                val url = URL("$DRIVE_API/files?q=$abfrage&fields=$felder")
+                val felder = URLEncoder.encode("files(id,name,mimeType,size,modifiedTime)", "UTF-8")
+                val url = URL(
+                    "$DRIVE_API/files?q=$abfrage&fields=$felder&pageSize=1000&orderBy=modifiedTime+desc"
+                )
                 val verbindung = url.openConnection() as HttpURLConnection
                 verbindung.setRequestProperty("Authorization", "Bearer $token")
                 val antwort = verbindung.inputStream.bufferedReader().readText()
-                val dateiArray = JSONObject(antwort).getJSONArray("files")
+                val json = JSONObject(antwort)
+                val dateiArray = if (json.has("files")) json.getJSONArray("files")
+                    else return@withContext emptyList()
                 (0 until dateiArray.length()).map { i ->
                     val obj = dateiArray.getJSONObject(i)
                     DriveOrdnerDatei(
                         id = obj.getString("id"),
                         name = obj.getString("name"),
-                        mimeType = obj.getString("mimeType"),
+                        mimeType = obj.optString("mimeType", "application/octet-stream"),
                         groesse = if (obj.has("size")) obj.getLong("size") else null,
                         geaendertAm = if (obj.has("modifiedTime")) obj.getString("modifiedTime") else null
                     )
