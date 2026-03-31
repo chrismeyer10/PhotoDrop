@@ -13,8 +13,10 @@ stateDiagram-v2
 
     state ArchivScreen {
         [*] --> DokBereit
-        DokBereit --> DokGeladen : Foto / Datei (mit Vorschau)
-        DokGeladen --> DokAnalysiert : analysieren()
+        DokBereit --> DokGeladen : Foto / Datei ausgewaehlt
+        DokGeladen --> DokGeladen : Schnellanalyse fertig (Felder befuellt)
+        DokGeladen --> DokHochladen : hochladen(dateiname, drivePfad)
+        DokGeladen --> DokAnalysiert : Mit KI analysieren
         DokGeladen --> DokBereit : zuruecksetzen()
         DokAnalysiert --> DokVorschlag : KI-Antwort (Dateiname + Drive-Pfad)
         DokAnalysiert --> DokAnalyseFehler : KI-Fehler
@@ -25,7 +27,8 @@ stateDiagram-v2
         DokVorschlag --> DokHochladen : hochladen(dateiname, drivePfad)
         DokHochladen --> DokFertig : Erfolg (mehrstufiger Pfad erstellt)
         DokHochladen --> DokFehler : Fehler
-        DokFertig --> DokBereit : zuruecksetzen()
+        DokFertig --> DokBereit : Animation abgelaufen (auto) oder Button
+        DokFertig --> DriveInhaltNeuLaden : Drive-Ordner aktualisieren
         DokFehler --> DokBereit : zuruecksetzen()
     }
 
@@ -48,6 +51,8 @@ stateDiagram-v2
         Verbunden --> InhaltGeladen : Ordnerinhalt geladen
         Verbunden --> NichtVerbunden : Abmelden
         InhaltGeladen --> NichtVerbunden : Abmelden
+        InhaltGeladen --> InhaltGeladen : inhaltNeuLaden() (nach Upload)
+        DriveInhaltNeuLaden --> InhaltGeladen : Dateiliste aktualisiert
     }
 
     state EinstellungenScreen {

@@ -8,6 +8,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +35,13 @@ fun DokumentScreen(
 
     var kameraUri by remember { mutableStateOf<Uri?>(null) }
     var zeigAnmeldeHinweis by remember { mutableStateOf(false) }
+
+    // Drive-Ordner neu laden sobald Upload abgeschlossen ist.
+    LaunchedEffect(zustand) {
+        if (zustand is DokumentZustand.Fertig) {
+            driveViewModel.inhaltNeuLaden()
+        }
+    }
 
     val kameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -76,7 +84,7 @@ fun DokumentScreen(
                 kameraErlaubnisLauncher.launch(Manifest.permission.CAMERA)
             }
         },
-        onDateiAuswaehlen = {dateiLauncher.launch(arrayOf("*/*")) },
+        onDateiAuswaehlen = { dateiLauncher.launch(arrayOf("*/*")) },
         onAnalysieren = { viewModel.analysieren() },
         onHochladen = { name, ordner ->
             if (token != null && ordnerId != null) {
