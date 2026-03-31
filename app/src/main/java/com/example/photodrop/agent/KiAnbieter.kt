@@ -17,7 +17,7 @@ sealed class KiAnbieter(
 
     companion object {
         // Alle verfuegbaren Anbieter fuer die Auswahl-UI.
-        val alle = listOf(OcrKostenlos, Claude, GptMini)
+        val alle: List<KiAnbieter> by lazy { listOf(OcrKostenlos, Claude, GptMini) }
 
         // Findet einen Anbieter anhand der Modell-ID.
         fun vonModellId(id: String): KiAnbieter {

@@ -50,7 +50,7 @@ fun DokumentScreen(
     }
 
     val dateiLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri -> uri?.let { viewModel.dokumentSetzen(it, context) } }
 
     val token = driveTokenHolen(driveZustand)
@@ -76,7 +76,7 @@ fun DokumentScreen(
                 kameraErlaubnisLauncher.launch(Manifest.permission.CAMERA)
             }
         },
-        onDateiAuswaehlen = { dateiLauncher.launch("image/*") },
+        onDateiAuswaehlen = {dateiLauncher.launch(arrayOf("*/*")) },
         onAnalysieren = { viewModel.analysieren() },
         onHochladen = { name, ordner ->
             if (token != null && ordnerId != null) {
