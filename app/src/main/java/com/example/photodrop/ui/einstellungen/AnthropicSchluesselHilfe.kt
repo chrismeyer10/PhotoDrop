@@ -30,6 +30,21 @@ fun AnthropicSchluesselHilfe(modifier: Modifier = Modifier) {
 
     Column(modifier = modifier) {
         Text(
+            text = "Wichtig: Claude Pro Abo != API-Zugang",
+            style = MaterialTheme.typography.labelMedium,
+            color = TextHell
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Ein Claude Pro oder Max Abo (claude.ai) gibt keinen API-Zugang — das sind " +
+                "zwei getrennte Produkte von Anthropic. Du benoenigst einen separaten API-Key von " +
+                "von console.anthropic.com: dort ein Konto anlegen, Zahlungsmethode hinterlegen " +
+                "und einen API-Key generieren.",
+            style = MaterialTheme.typography.bodySmall,
+            color = TextGedaempft
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
             text = "Anleitung:",
             style = MaterialTheme.typography.labelMedium,
             color = TextGedaempft

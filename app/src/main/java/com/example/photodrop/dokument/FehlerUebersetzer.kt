@@ -13,7 +13,13 @@ fun fehlerUebersetzen(rohMeldung: String): String {
         "network" in klein || "connect" in klein || "unreachable" in klein ->
             "Keine Internetverbindung. Bitte Netzwerk pruefen."
         "401" in klein || "unauthorized" in klein || "authentication" in klein ->
-            "Die KI-Authentifizierung ist fehlgeschlagen. API-Schluessel pruefen."
+            "API-Schluessel ungueltig [401].\n\n" +
+            "Hinweis: Ein Claude Pro oder Max Abo (claude.ai) gibt keinen API-Zugang. " +
+            "Bitte einen separaten API-Key unter console.anthropic.com erstellen."
+        "403" in klein || "forbidden" in klein || "permission" in klein ->
+            "Kein API-Zugang [403].\n\n" +
+            "Hinweis: Ein Claude Pro oder Max Abo (claude.ai) gibt keinen API-Zugang. " +
+            "Bitte einen separaten API-Key unter console.anthropic.com erstellen."
         "invalid_request" in klein || "400" in klein ->
             "Die KI-Analyse ist voruebergehend nicht verfuegbar."
         "500" in klein || "server" in klein ->

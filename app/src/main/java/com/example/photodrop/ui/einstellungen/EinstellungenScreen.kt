@@ -6,7 +6,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.photodrop.agent.AgentResult
 import com.example.photodrop.agent.KiAnbieter
@@ -26,6 +29,13 @@ fun EinstellungenScreen(
     val testErgebnis by viewModel.testErgebnis.collectAsState()
     val scope = rememberCoroutineScope()
 
+    // Zeigt den Claude-API-Hinweis-Dialog wenn Claude gewaehlt und kein Key gespeichert.
+    var claudeHinweisZeigen by remember { mutableStateOf(false) }
+
+    if (claudeHinweisZeigen) {
+        ClaudeApiHinweisDialog(onSchliessen = { claudeHinweisZeigen = false })
+    }
+
     testErgebnis?.let { (erfolg, meldung) ->
         AlertDialog(
             onDismissRequest = { viewModel.testErgebnisSchliessen() },
@@ -44,7 +54,13 @@ fun EinstellungenScreen(
         istAnthropicGespeichert = viewModel.istAnthropicKeyGespeichert(),
         istOpenAiGespeichert = viewModel.istOpenAiKeyGespeichert(),
         testLaeuft = testLaeuft,
-        onAnbieterGewaehlt = { viewModel.anbieterWaehlen(it) },
+        onAnbieterGewaehlt = { anbieter ->
+            viewModel.anbieterWaehlen(anbieter)
+            // Hinweis zeigen wenn Claude gewaehlt und noch kein API-Key gespeichert.
+            if (anbieter == KiAnbieter.Claude && !viewModel.istAnthropicKeyGespeichert()) {
+                claudeHinweisZeigen = true
+            }
+        },
         onAnthropicKeyAendern = { viewModel.anthropicKeyAendern(it) },
         onOpenAiKeyAendern = { viewModel.openAiKeyAendern(it) },
         onAnthropicSpeichern = {
@@ -88,25 +104,5 @@ private suspend fun verbindungTesten(
         is AgentResult.Error -> viewModel.testAbschliessen(
             false, verbindungsFehlerText(ergebnis.message)
         )
-    }
-}
-
-// Wandelt eine Fehlermeldung in einen nutzerfreundlichen Text um.
-// Zeigt immer die rohe API-Meldung an, damit der Nutzer den genauen Fehlergrund sieht.
-private fun verbindungsFehlerText(rohMeldung: String): String {
-    val klein = rohMeldung.lowercase()
-    return when {
-        "401" in klein || "unauthorized" in klein || "authentication" in klein ->
-            "Schluessel ungueltig. Bitte pruefen ob der Key korrekt kopiert wurde.\n\nAPI: ${rohMeldung.take(200)}"
-        "credit balance" in klein || "billing" in klein ->
-            "Kontoguthaben erschoepft.\n\n" +
-            "Hinweis: Ein Claude.ai-Abo gibt KEINEN API-Zugriff. " +
-            "Bitte unter console.anthropic.com ein Konto anlegen und Credits kaufen.\n\n" +
-            "API: $rohMeldung"
-        "rate limit" in klein || "429" in klein ->
-            "Zu viele Anfragen. Bitte kurz warten.\n\nAPI: ${rohMeldung.take(200)}"
-        "network" in klein || "connect" in klein ->
-            "Keine Internetverbindung. Bitte Netzwerk pruefen.\n\nAPI: ${rohMeldung.take(200)}"
-        else -> rohMeldung.take(300)
     }
 }

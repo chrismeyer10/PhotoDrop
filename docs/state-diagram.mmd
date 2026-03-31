@@ -58,11 +58,13 @@ stateDiagram-v2
     state EinstellungenScreen {
         [*] --> AnbieterAuswaehlen
         AnbieterAuswaehlen --> OcrKostenlos : OcrKostenlos gewaehlt
-        AnbieterAuswaehlen --> ClaudeMitKey : Claude gewaehlt
+        AnbieterAuswaehlen --> ClaudeHinweisDialog : Claude gewaehlt (kein Key gespeichert)
+        ClaudeHinweisDialog --> ClaudeMitKey : Schliessen
+        AnbieterAuswaehlen --> ClaudeMitKey : Claude gewaehlt (Key gespeichert)
         AnbieterAuswaehlen --> GptMiniMitKey : GPT-4o-mini gewaehlt
         ClaudeMitKey --> VerbindungsTest : Speichern & testen
         GptMiniMitKey --> VerbindungsTest : Speichern & testen
-        VerbindungsTest --> TestErgebnis : Ergebnis
+        VerbindungsTest --> TestErgebnis : Ergebnis (Erfolg oder 401/403/Netz)
         TestErgebnis --> AnbieterAuswaehlen : OK
         ClaudeMitKey --> AnbieterAuswaehlen : Key loeschen
         GptMiniMitKey --> AnbieterAuswaehlen : Key loeschen
