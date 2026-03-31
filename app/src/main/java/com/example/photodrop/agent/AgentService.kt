@@ -107,9 +107,13 @@ class AgentService(private val apiKey: String) : KiDienst {
         // Anthropic SDK wirft spezifische Exceptions — Klassenname hilft
         return when {
             "AuthenticationException" in name || "401" in meldung ->
-                "API-Schluessel ungueltig [401]. Bitte pruefen."
+                "API-Schluessel ungueltig [401].\n\n" +
+                "Hinweis: Ein Claude Pro oder Max Abo (claude.ai) gibt keinen API-Zugang. " +
+                "Bitte einen separaten API-Key unter console.anthropic.com erstellen."
             "PermissionDeniedException" in name || "403" in meldung ->
-                "Zugriff verweigert [403]. API-Schluessel hat keine Berechtigung."
+                "Kein API-Zugang [403].\n\n" +
+                "Hinweis: Ein Claude Pro oder Max Abo (claude.ai) gibt keinen API-Zugang. " +
+                "Bitte einen separaten API-Key unter console.anthropic.com erstellen."
             "RateLimitException" in name || "429" in meldung ->
                 "Zu viele Anfragen [429]. Bitte kurz warten."
             "InternalServerException" in name || "500" in meldung ->
