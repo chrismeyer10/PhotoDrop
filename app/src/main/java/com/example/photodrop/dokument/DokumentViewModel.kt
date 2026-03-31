@@ -31,19 +31,32 @@ class DokumentViewModel(application: Application) : AndroidViewModel(application
     private var aktuelleUri: Uri? = null
     private var aktuelleVorschau: Bitmap? = null
 
-    // Setzt ein Dokument (von Kamera oder File Picker).
+    // Setzt ein Dokument und startet sofort die kostenlose Schnellanalyse.
     fun dokumentSetzen(uri: Uri, context: Context) {
         val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
         val istPdf = mimeType == "application/pdf"
         aktuelleMimeType = mimeType
         aktuelleUri = uri
 
-        viewModelScope.launch {
+        aktuellerJob?.cancel()
+        aktuellerJob = viewModelScope.launch {
             aktuelleVorschau = if (istPdf) DokumentLeser.pdfVorschauErstellen(uri, context)
             else DokumentLeser.vorschauErstellen(uri, context)
             aktuelleBildBytes = if (istPdf) DokumentLeser.pdfErsteSeiteAlsBild(uri, context)
             else DokumentLeser.bildAlsBytes(uri, context)
-            _zustand.value = DokumentZustand.Geladen(uri, aktuelleVorschau)
+
+            // Sofort Geladen-Zustand zeigen — Analyse noch nicht fertig.
+            _zustand.value = DokumentZustand.Geladen(uri, aktuelleVorschau, analysiertLaeuft = true)
+
+            // Kostenlose Schnellanalyse im Hintergrund.
+            val ergebnis = DokumentSchnellAnalyse.analysieren(uri, context)
+            _zustand.value = DokumentZustand.Geladen(
+                uri = uri,
+                vorschau = aktuelleVorschau,
+                dateiname = ergebnis.dateiname,
+                drivePfad = ergebnis.drivePfad,
+                analysiertLaeuft = false
+            )
         }
     }
 

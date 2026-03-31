@@ -9,10 +9,16 @@ sealed interface DokumentZustand {
     // Startbereit — kein Dokument geladen.
     object Bereit : DokumentZustand
 
-    // Dokument wurde geladen und ist bereit zur Analyse.
-    data class Geladen(val uri: Uri, val vorschau: Bitmap?) : DokumentZustand
+    // Dokument geladen — kostenlose Analyse laeuft im Hintergrund.
+    data class Geladen(
+        val uri: Uri,
+        val vorschau: Bitmap?,
+        val dateiname: String = "",
+        val drivePfad: String = "",
+        val analysiertLaeuft: Boolean = true
+    ) : DokumentZustand
 
-    // KI analysiert das Dokument.
+    // KI analysiert das Dokument (KI-Analyse laeuft).
     object Analysiert : DokumentZustand
 
     // KI-Vorschlag liegt vor — User kann anpassen.

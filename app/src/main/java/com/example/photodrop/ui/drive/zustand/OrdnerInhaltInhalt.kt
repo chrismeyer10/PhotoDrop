@@ -1,128 +1,66 @@
 package com.example.photodrop.ui.drive.zustand
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.photodrop.ui.drive.api.DriveOrdnerDatei
-import com.example.photodrop.ui.theme.AkzentFarbe
 import com.example.photodrop.ui.theme.PhotoDropTheme
-import com.example.photodrop.ui.theme.TextGedaempft
 
-// Gruene Terminal-Schriftfarbe fuer Dateinamen.
-private val TerminalGruen = Color(0xFF00FF88)
-
-// Tuerkise Farbe fuer Metadaten.
-private val TerminalMeta = Color(0xFF4EC9B0)
-
-// Zeigt den Ordnerinhalt in einer Terminal-aehnlichen Tree-Struktur.
+// Zeigt den Ordnerinhalt mit Suchleiste, Datei-Karten und Aktionen.
 @Composable
 fun OrdnerInhaltInhalt(
     zustand: DriveZustand.InhaltGeladen,
     onOrdnerWechseln: () -> Unit = {}
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        OrdnerKopfzeile(zustand.kontoName, onOrdnerWechseln)
-        if (zustand.dateien.isEmpty()) {
-            OrdnerLeerHinweis()
-        } else {
-            OrdnerBaumInhalt(zustand.dateien)
-        }
-    }
-}
+    var suchtext by remember { mutableStateOf("") }
+    var ausgewaehlteDatei by remember { mutableStateOf<DriveOrdnerDatei?>(null) }
 
-// Kopfzeile mit Ordner-Symbol, Kontoname und Wechsel-Button.
-@Composable
-private fun OrdnerKopfzeile(kontoName: String, onOrdnerWechseln: () -> Unit = {}) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                "\uD83D\uDCC1  Drive-Ordner", color = TerminalGruen,
-                fontFamily = FontFamily.Monospace, fontSize = 14.sp,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-            Text(
-                "    $kontoName", color = TextGedaempft,
-                fontFamily = FontFamily.Monospace, fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-        }
-        IconButton(onClick = onOrdnerWechseln) {
-            Icon(
-                Icons.Filled.SwapHoriz, "Ordner wechseln",
-                tint = AkzentFarbe, modifier = Modifier.size(24.dp)
-            )
-        }
+    val gefilterteDateien = zustand.dateien.filter { datei ->
+        suchtext.isBlank() || datei.name.contains(suchtext, ignoreCase = true)
     }
-}
 
-// Hinweis wenn der Ordner leer ist.
-@Composable
-private fun OrdnerLeerHinweis() {
-    Text(
-        "    \u2514\u2500\u2500 (leer)", color = TextGedaempft,
-        fontFamily = FontFamily.Monospace, fontSize = 13.sp,
-        modifier = Modifier.padding(bottom = 4.dp)
-    )
-    Text(
-        "\nNoch keine Dateien im Ordner \u2014 mach dein erstes Foto.",
-        color = TextGedaempft, fontFamily = FontFamily.Monospace, fontSize = 12.sp
-    )
-}
-
-// Zeigt alle Dateien als Tree mit Praefix-Zeichen.
-@Composable
-private fun OrdnerBaumInhalt(dateien: List<DriveOrdnerDatei>) {
-    dateien.forEachIndexed { index, datei ->
-        val istLetzte = index == dateien.lastIndex
-        val praefix = if (istLetzte) "    \u2514\u2500\u2500 " else "    \u251C\u2500\u2500 "
-        DateiZeile(praefix, datei)
-    }
-}
-
-// Einzelne Datei-Zeile mit Icon, Name und Metadaten.
-@Composable
-private fun DateiZeile(praefix: String, datei: DriveOrdnerDatei) {
-    val meta = buildString {
-        if (datei.groesseFormatiert.isNotEmpty()) append("  ${datei.groesseFormatiert}")
-        datei.geaendertAm?.take(10)?.let { append("  $it") }
-    }
-    Column(modifier = Modifier.padding(bottom = 2.dp)) {
-        Text(
-            "$praefix${datei.icon}  ${datei.name}",
-            color = if (datei.istOrdner) TerminalMeta else TerminalGruen,
-            fontFamily = FontFamily.Monospace, fontSize = 13.sp
+    Column(modifier = Modifier.fillMaxSize()) {
+        OrdnerKopfzeile(
+            kontoName = zustand.kontoName,
+            dateiAnzahl = zustand.dateien.size,
+            onOrdnerWechseln = onOrdnerWechseln
         )
-        if (meta.isNotBlank()) {
-            Text(
-                "         $meta", color = TextGedaempft,
-                fontFamily = FontFamily.Monospace, fontSize = 11.sp
-            )
+        OrdnerSuchleiste(
+            suchtext = suchtext,
+            onSuchtextAendern = { suchtext = it },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+        if (gefilterteDateien.isEmpty()) {
+            OrdnerLeerzustand(hatSuchfilter = suchtext.isNotBlank())
+        } else {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(gefilterteDateien, key = { it.id }) { datei ->
+                    DateiKarte(
+                        datei = datei,
+                        onKlick = { ausgewaehlteDatei = datei },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
+                }
+            }
         }
+    }
+
+    ausgewaehlteDatei?.let { datei ->
+        DateiAktionsDialog(
+            datei = datei,
+            onSchliessen = { ausgewaehlteDatei = null }
+        )
     }
 }
 
@@ -134,8 +72,10 @@ private fun OrdnerInhaltInhaltVorschau() {
             DriveZustand.InhaltGeladen(
                 "max@gmail.com", "abc",
                 listOf(
-                    DriveOrdnerDatei("1", "foto_001.jpg", "image/jpeg", 1_234_567, "2026-03-21T10:00:00Z"),
-                    DriveOrdnerDatei("2", "Sicherung", "application/vnd.google-apps.folder", null, null)
+                    DriveOrdnerDatei("1", "Rechnung Amazon 2026.pdf", "application/pdf", 1_234_567, "2026-03-21T10:00:00Z"),
+                    DriveOrdnerDatei("2", "Kontoauszug Maerz.pdf", "application/pdf", 987_654, "2026-03-15T08:30:00Z"),
+                    DriveOrdnerDatei("3", "foto_001.jpg", "image/jpeg", 2_345_678, "2026-03-10T14:00:00Z"),
+                    DriveOrdnerDatei("4", "Sicherung", "application/vnd.google-apps.folder", null, null)
                 )
             )
         )

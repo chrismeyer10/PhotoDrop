@@ -214,6 +214,17 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Laedt den Ordnerinhalt neu — wird nach einem Dokument-Upload aufgerufen.
+    fun inhaltNeuLaden() {
+        val aktuell = _zustand.value
+        val (token, kontoName, ordnerId) = when (aktuell) {
+            is DriveZustand.InhaltGeladen -> Triple(aktuell.token, aktuell.kontoName, aktuell.ordnerId)
+            is DriveZustand.Verbunden -> Triple(aktuell.token, aktuell.kontoName, aktuell.ordnerId)
+            else -> return
+        }
+        ladeJob = viewModelScope.launch { ordnerInhaltLaden(token, kontoName, ordnerId) }
+    }
+
     // Setzt den Zustand zurueck.
     fun zuruecksetzen() { _zustand.value = DriveZustand.NichtVerbunden }
 
