@@ -14,7 +14,7 @@ sealed class NavigationsZiel(
     val icon: ImageVector
 ) {
     // Screen fuer Dokument-Archivierung mit KI-Analyse und Drive-Upload
-    object Archiv : NavigationsZiel("archiv", "Archiv", Icons.Filled.Archive)
+    object Archiv : NavigationsZiel("archiv", "Scannen oder auswählen", Icons.Filled.Archive)
 
     // Screen fuer die Google Drive Verbindung
     object GoogleDrive : NavigationsZiel("drive", "Google Drive", Icons.Filled.CloudSync)

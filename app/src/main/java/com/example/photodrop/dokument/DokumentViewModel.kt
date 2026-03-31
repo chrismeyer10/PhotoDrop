@@ -6,7 +6,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.photodrop.agent.AgentService
+import com.example.photodrop.agent.KiAnbieter
+import com.example.photodrop.agent.KiDienstFabrik
 import com.example.photodrop.ui.drive.api.DriveVerbindung
 import com.example.photodrop.ui.einstellungen.ApiSchluesselHelfer
 import kotlinx.coroutines.Job
@@ -46,22 +47,32 @@ class DokumentViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // Startet die KI-Analyse — verwendet gespeicherten oder BuildConfig-Key.
+    // Startet die KI-Analyse mit dem in den Einstellungen gewaehlten Anbieter.
     fun analysieren() {
         val bytes = aktuelleBildBytes ?: return
         val app: Application = getApplication()
-        val schluessel = ApiSchluesselHelfer.aktivenSchluesselHolen(app)
+        val anbieter = ApiSchluesselHelfer.aktuellenAnbieterHolen(app)
+
+        if (anbieter == KiAnbieter.OcrKostenlos) {
+            ocrAnalysieren()
+            return
+        }
+
+        val schluessel = ApiSchluesselHelfer.schluesselFuerAnbieter(app, anbieter)
         if (schluessel == null) {
             _zustand.value = DokumentZustand.AnalyseFehler(
-                meldung = "Kein API-Schluessel vorhanden. Bitte in Einstellungen eintragen oder kostenlose OCR nutzen.",
+                meldung = "Kein API-Schluessel fuer ${anbieter.anzeigeName} gespeichert. " +
+                    "Bitte in Einstellungen eintragen.",
                 uri = aktuelleUri ?: Uri.EMPTY,
                 vorschau = aktuelleVorschau
             )
             return
         }
+
+        val dienst = KiDienstFabrik.erstellen(anbieter, schluessel) ?: return
         _zustand.value = DokumentZustand.Analysiert
         aktuellerJob = viewModelScope.launch {
-            val ergebnis = AgentService(schluessel).run(
+            val ergebnis = dienst.analysieren(
                 prompt = "Analysiere dieses Dokument und schlage einen Dateinamen und Unterordner vor.",
                 systemPrompt = systemPromptBauen(verlauf),
                 bild = bytes,
@@ -128,7 +139,6 @@ class DokumentViewModel(application: Application) : AndroidViewModel(application
     }
 
     // Erstellt einen sinnvollen Dateinamen aus dem OCR-Text.
-    // Bevorzugt Zeilen mit mehreren Woertern gegenueber reinen Zahlen/Daten.
     private fun dateinameAusOcrText(text: String): String {
         val zeilen = text.lines()
             .map { it.trim() }
