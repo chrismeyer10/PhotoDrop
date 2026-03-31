@@ -13,7 +13,7 @@ import com.example.photodrop.ui.theme.PhotoDropTheme
 @Composable
 private fun DriveInhaltNichtVerbundenVorschau() {
     PhotoDropTheme {
-        DriveInhalt(DriveZustand.NichtVerbunden, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+        DriveInhalt(zustand = DriveZustand.NichtVerbunden, onVerbinden = {}, onZuruecksetzen = {})
     }
 }
 
@@ -21,7 +21,7 @@ private fun DriveInhaltNichtVerbundenVorschau() {
 @Composable
 private fun DriveInhaltVerbindetVorschau() {
     PhotoDropTheme {
-        DriveInhalt(DriveZustand.Verbindet, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+        DriveInhalt(zustand = DriveZustand.Verbindet, onVerbinden = {}, onZuruecksetzen = {})
     }
 }
 
@@ -30,21 +30,47 @@ private fun DriveInhaltVerbindetVorschau() {
 private fun DriveInhaltVerbundenVorschau() {
     PhotoDropTheme {
         DriveInhalt(
-            DriveZustand.Verbunden("max@gmail.com", "abc123"),
-            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+            zustand = DriveZustand.Verbunden("max@gmail.com", "abc123"),
+            onVerbinden = {}, onZuruecksetzen = {}
         )
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Inhalt geladen")
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Inhalt geladen Root")
 @Composable
-private fun DriveInhaltGeladenVorschau() {
+private fun DriveInhaltGeladenRootVorschau() {
     PhotoDropTheme {
         DriveInhalt(
-            DriveZustand.InhaltGeladen(
-                "max@gmail.com", "abc123",
-                listOf(DriveOrdnerDatei("1", "foto.jpg", "image/jpeg", 1_200_000, "2026-03-21"))
-            ), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+            zustand = DriveZustand.InhaltGeladen(
+                kontoName = "max@gmail.com",
+                ordnerId = "root",
+                dateien = listOf(
+                    DriveOrdnerDatei("1", "Rechnungen", "application/vnd.google-apps.folder", null, null),
+                    DriveOrdnerDatei("2", "Fotos 2026", "application/vnd.google-apps.folder", null, null)
+                )
+            ),
+            navigationsStack = emptyList(),
+            aktiverOrdner = DriveOrdner("1", "Rechnungen"),
+            onVerbinden = {}, onZuruecksetzen = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Inhalt geladen Unterordner")
+@Composable
+private fun DriveInhaltGeladenUnterordnerVorschau() {
+    PhotoDropTheme {
+        DriveInhalt(
+            zustand = DriveZustand.InhaltGeladen(
+                kontoName = "max@gmail.com",
+                ordnerId = "abc",
+                dateien = listOf(
+                    DriveOrdnerDatei("3", "foto.jpg", "image/jpeg", 1_200_000, "2026-03-21")
+                ),
+                ordnerName = "Rechnungen"
+            ),
+            navigationsStack = listOf(DriveOrdner("1", "Rechnungen")),
+            onVerbinden = {}, onZuruecksetzen = {}
         )
     }
 }
@@ -54,33 +80,33 @@ private fun DriveInhaltGeladenVorschau() {
 private fun DriveInhaltFehlerVorschau() {
     PhotoDropTheme {
         DriveInhalt(
-            DriveZustand.Fehler("Anmeldung fehlgeschlagen: 12500"),
-            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+            zustand = DriveZustand.Fehler("Anmeldung fehlgeschlagen: 12500"),
+            onVerbinden = {}, onZuruecksetzen = {}
         )
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Ordner auswaehlen mit Abmelden")
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Ordner auswaehlen")
 @Composable
 private fun DriveInhaltOrdnerAuswaehlenVorschau() {
     PhotoDropTheme {
         DriveInhalt(
-            DriveZustand.OrdnerAuswaehlen(
+            zustand = DriveZustand.OrdnerAuswaehlen(
                 "max@gmail.com", "token",
                 listOf(DriveOrdner("id1", "PhotoDrop")), null
             ),
-            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+            onVerbinden = {}, onZuruecksetzen = {}
         )
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Ordner benennen mit Abmelden")
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Ordner benennen")
 @Composable
 private fun DriveInhaltOrdnerBenennenVorschau() {
     PhotoDropTheme {
         DriveInhalt(
-            DriveZustand.OrdnerBenennen("max@gmail.com", "token"),
-            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+            zustand = DriveZustand.OrdnerBenennen("max@gmail.com", "token"),
+            onVerbinden = {}, onZuruecksetzen = {}
         )
     }
 }

@@ -50,6 +50,8 @@ fun AppNavigation() {
     // ViewModel auf Activity-Ebene — ueberlebt Navigation zwischen Screens
     val driveViewModel: DriveViewModel = viewModel()
     val schnellUploadZustand by driveViewModel.schnellUploadZustand.collectAsState()
+    val zeigeOrdnerDialog by driveViewModel.zeigeOrdnerAuswahlDialog.collectAsState()
+    val aktiverOrdner by driveViewModel.aktiverOrdner.collectAsState()
 
     val aktuellerEintrag by navController.currentBackStackEntryAsState()
     val aktuelleRoute = aktuellerEintrag?.destination?.route
@@ -58,11 +60,11 @@ fun AppNavigation() {
     // Kamera URI fuer den Schnell-Upload-Flow
     var kameraUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Launcher fuer Foto aufnehmen und direkt in Drive speichern
+    // Launcher fuer Foto aufnehmen — zeigt danach Ordner-Auswahl-Dialog
     val schnellKameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { erfolg ->
-        if (erfolg) kameraUri?.let { driveViewModel.fotoSchnellHochladen(it, context) }
+        if (erfolg) kameraUri?.let { driveViewModel.fotoFuerUploadVormerken(it) }
     }
 
     // Launcher fuer Kamera-Erlaubnis
@@ -104,7 +106,7 @@ fun AppNavigation() {
         Scaffold(
             bottomBar = {
                 SchnellAktionsLeiste(
-                    aktuellerOrdnerName = driveViewModel.ordnerName,
+                    aktuellerOrdnerName = aktiverOrdner?.name ?: driveViewModel.ordnerName,
                     onFotoMachen = {
                         if (hatKameraErlaubnis(context)) {
                             val uri = dateiUriErstellen(context)
@@ -126,7 +128,6 @@ fun AppNavigation() {
             snackbarHost = { SnackbarHost(snackbarHostState) }
         ) { innenAbstand ->
             Box(modifier = Modifier.fillMaxSize().padding(innenAbstand)) {
-                // Alle Screens werden hier ueber Routen gesteuert
                 NavHost(
                     navController = navController,
                     startDestination = NavigationsZiel.Archiv.route
@@ -164,6 +165,19 @@ fun AppNavigation() {
                         onFertig = { driveViewModel.schnellUploadZuruecksetzen() }
                     )
                 }
+            }
+
+            // Ordner-Auswahl-Dialog nach Schnellfoto
+            if (zeigeOrdnerDialog) {
+                val verfuegbareOrdner = driveViewModel.rootOrdnerAusZustand()
+                OrdnerAuswahlDialog(
+                    verfuegbareOrdner = verfuegbareOrdner,
+                    aktiverOrdner = aktiverOrdner,
+                    onOrdnerGewaehlt = { ordner ->
+                        driveViewModel.ordnerFuerFotoAuswaehlenUndHochladen(ordner, context)
+                    },
+                    onAbbrechen = { driveViewModel.ordnerAuswahlAbbrechen() }
+                )
             }
         }
     }

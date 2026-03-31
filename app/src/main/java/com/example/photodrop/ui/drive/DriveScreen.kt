@@ -42,12 +42,16 @@ fun DriveScreen(
     onMenuOeffnen: () -> Unit = {}
 ) {
     val zustand by viewModel.zustand.collectAsState()
+    val navigationsStack by viewModel.navigationsStack.collectAsState()
+    val aktiverOrdner by viewModel.aktiverOrdner.collectAsState()
     val anmeldeLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { viewModel.anmeldeErgebnisVerarbeiten(it.data) }
 
     DriveInhalt(
         zustand = zustand,
+        navigationsStack = navigationsStack,
+        aktiverOrdner = aktiverOrdner,
         onVerbinden = { anmeldeLauncher.launch(viewModel.anmeldeIntentErstellen()) },
         onOrdnerAuswaehlen = viewModel::ordnerAuswaehlen,
         onNeuenOrdnerErstellen = viewModel::neuenOrdnerErstellen,
@@ -57,7 +61,10 @@ fun DriveScreen(
         onAbmelden = viewModel::abmelden,
         onMenuOeffnen = onMenuOeffnen,
         onLadeAbbrechen = viewModel::ladeAbbrechen,
-        onOrdnerWechseln = viewModel::ordnerWechseln
+        onOrdnerWechseln = viewModel::ordnerWechseln,
+        onOrdnerOeffnen = { viewModel.inOrdnerNavigieren(it) },
+        onOrdnerAlsZielSetzen = { viewModel.aktivenOrdnerSetzen(it) },
+        onZurueckNavigieren = viewModel::zurueckNavigieren
     )
 }
 
@@ -66,6 +73,8 @@ fun DriveScreen(
 @Composable
 fun DriveInhalt(
     zustand: DriveZustand,
+    navigationsStack: List<DriveOrdner> = emptyList(),
+    aktiverOrdner: DriveOrdner? = null,
     onVerbinden: () -> Unit,
     onOrdnerAuswaehlen: (DriveOrdner) -> Unit = {},
     onNeuenOrdnerErstellen: () -> Unit = {},
@@ -75,19 +84,21 @@ fun DriveInhalt(
     onAbmelden: () -> Unit = {},
     onMenuOeffnen: () -> Unit = {},
     onLadeAbbrechen: () -> Unit = {},
-    onOrdnerWechseln: () -> Unit = {}
+    onOrdnerWechseln: () -> Unit = {},
+    onOrdnerOeffnen: (DriveOrdner) -> Unit = {},
+    onOrdnerAlsZielSetzen: (DriveOrdner) -> Unit = {},
+    onZurueckNavigieren: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Google Drive", color = TextHell) },
+                title = { Text(titelFuerZustand(zustand, navigationsStack), color = TextHell) },
                 navigationIcon = {
                     IconButton(onClick = onMenuOeffnen) {
                         Icon(Icons.Filled.Menu, "Menue oeffnen", tint = TextHell)
                     }
                 },
                 actions = {
-                    // Abmelden-Button fuer alle angemeldeten Zustaende anzeigen.
                     val istAngemeldet = zustand is DriveZustand.Verbunden
                             || zustand is DriveZustand.InhaltGeladen
                             || zustand is DriveZustand.OrdnerLaden
@@ -120,6 +131,8 @@ fun DriveInhalt(
             ) { aktuellerZustand ->
                 ZustandInhaltAuswaehlen(
                     zustand = aktuellerZustand,
+                    navigationsStack = navigationsStack,
+                    aktiverOrdner = aktiverOrdner,
                     onVerbinden = onVerbinden,
                     onOrdnerAuswaehlen = onOrdnerAuswaehlen,
                     onNeuenOrdnerErstellen = onNeuenOrdnerErstellen,
@@ -127,9 +140,17 @@ fun DriveInhalt(
                     onOrdnerBenennenAbbrechen = onOrdnerBenennenAbbrechen,
                     onZuruecksetzen = onZuruecksetzen,
                     onLadeAbbrechen = onLadeAbbrechen,
-                    onOrdnerWechseln = onOrdnerWechseln
+                    onOrdnerWechseln = onOrdnerWechseln,
+                    onOrdnerOeffnen = onOrdnerOeffnen,
+                    onOrdnerAlsZielSetzen = onOrdnerAlsZielSetzen,
+                    onZurueckNavigieren = onZurueckNavigieren
                 )
             }
         }
     }
 }
+
+// Liefert den passenden Titel fuer die TopBar je nach Zustand und Navigationspfad.
+private fun titelFuerZustand(zustand: DriveZustand, navigationsStack: List<DriveOrdner>): String =
+    if (zustand is DriveZustand.InhaltGeladen) navigationsStack.lastOrNull()?.name ?: "Google Drive"
+    else "Google Drive"

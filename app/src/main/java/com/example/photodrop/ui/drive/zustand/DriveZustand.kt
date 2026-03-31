@@ -30,11 +30,13 @@ sealed interface DriveZustand {
     data class Verbunden(val kontoName: String, val ordnerId: String, val token: String = "") : DriveZustand
 
     // Ordnerinhalt wurde geladen und ist bereit zur Anzeige.
+    // ordnerName = null bedeutet Root-Ansicht (alle Ordner).
     data class InhaltGeladen(
         val kontoName: String,
         val ordnerId: String,
         val dateien: List<DriveOrdnerDatei>,
-        val token: String = ""
+        val token: String = "",
+        val ordnerName: String? = null
     ) : DriveZustand
 
     // Fehlerzustand mit optionalen Konto-Infos fuer Retry.
