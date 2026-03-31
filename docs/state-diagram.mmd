@@ -8,6 +8,8 @@ stateDiagram-v2
 
     ArchivScreen --> DriveScreen : Drawer
     DriveScreen --> ArchivScreen : Drawer
+    ArchivScreen --> EinstellungenScreen : Drawer / Einstellungen-Button
+    EinstellungenScreen --> ArchivScreen : Drawer
 
     state ArchivScreen {
         [*] --> DokBereit
@@ -46,6 +48,19 @@ stateDiagram-v2
         Verbunden --> InhaltGeladen : Ordnerinhalt geladen
         Verbunden --> NichtVerbunden : Abmelden
         InhaltGeladen --> NichtVerbunden : Abmelden
+    }
+
+    state EinstellungenScreen {
+        [*] --> AnbieterAuswaehlen
+        AnbieterAuswaehlen --> OcrKostenlos : OcrKostenlos gewaehlt
+        AnbieterAuswaehlen --> ClaudeMitKey : Claude gewaehlt
+        AnbieterAuswaehlen --> GptMiniMitKey : GPT-4o-mini gewaehlt
+        ClaudeMitKey --> VerbindungsTest : Speichern & testen
+        GptMiniMitKey --> VerbindungsTest : Speichern & testen
+        VerbindungsTest --> TestErgebnis : Ergebnis
+        TestErgebnis --> AnbieterAuswaehlen : OK
+        ClaudeMitKey --> AnbieterAuswaehlen : Key loeschen
+        GptMiniMitKey --> AnbieterAuswaehlen : Key loeschen
     }
 
     state AgentService {
