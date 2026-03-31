@@ -77,7 +77,7 @@ private fun ZustandsWeiche(
 ) {
     when (zustand) {
         is DokumentZustand.Bereit -> DokumentBereitInhalt(onFotografieren, onDateiAuswaehlen)
-        is DokumentZustand.Geladen -> DokumentGeladenInhalt(onAnalysieren, onZuruecksetzen)
+        is DokumentZustand.Geladen -> DokumentGeladenInhalt(zustand.vorschau, onAnalysieren, onZuruecksetzen)
         is DokumentZustand.Analysiert -> VorschlagLadeInhalt()
         is DokumentZustand.VorschlagBereit -> VorschlagInhalt(zustand, onHochladen, onZuruecksetzen)
         is DokumentZustand.LaeadtHoch -> VorschlagLadeInhalt(text = "Wird hochgeladen...")

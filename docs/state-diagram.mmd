@@ -13,17 +13,17 @@ stateDiagram-v2
 
     state ArchivScreen {
         [*] --> DokBereit
-        DokBereit --> DokGeladen : Foto / Datei
+        DokBereit --> DokGeladen : Foto / Datei (mit Vorschau)
         DokGeladen --> DokAnalysiert : analysieren()
         DokGeladen --> DokBereit : zuruecksetzen()
-        DokAnalysiert --> DokVorschlag : KI-Antwort
+        DokAnalysiert --> DokVorschlag : KI-Antwort (Dateiname + Drive-Pfad)
         DokAnalysiert --> DokAnalyseFehler : KI-Fehler
         DokAnalyseFehler --> DokManuellBenennen : trotzdemSpeichern()
         DokAnalyseFehler --> DokBereit : zuruecksetzen()
-        DokManuellBenennen --> DokHochladen : hochladen()
+        DokManuellBenennen --> DokHochladen : hochladen(dateiname, drivePfad)
         DokManuellBenennen --> DokBereit : zuruecksetzen()
-        DokVorschlag --> DokHochladen : hochladen()
-        DokHochladen --> DokFertig : Erfolg
+        DokVorschlag --> DokHochladen : hochladen(dateiname, drivePfad)
+        DokHochladen --> DokFertig : Erfolg (mehrstufiger Pfad erstellt)
         DokHochladen --> DokFehler : Fehler
         DokFertig --> DokBereit : zuruecksetzen()
         DokFehler --> DokBereit : zuruecksetzen()

@@ -95,7 +95,8 @@ class DokumentViewModel(application: Application) : AndroidViewModel(application
                     vorschau = aktuelleVorschau,
                     dateiname = dateiname,
                     unterordner = "Dokumente",
-                    begruendung = "Aus Texterkennung (OCR) — bitte Dateinamen pruefen."
+                    begruendung = "Aus Texterkennung (OCR) — bitte Dateinamen und Pfad pruefen.",
+                    drivePfad = "Dokumente"
                 )
             } catch (e: Exception) {
                 _zustand.value = DokumentZustand.ManuellBenennen(uri, aktuelleVorschau)
@@ -111,17 +112,17 @@ class DokumentViewModel(application: Application) : AndroidViewModel(application
         )
     }
 
-    // Laedt das Dokument in Google Drive hoch.
-    fun hochladen(dateiname: String, unterordner: String, token: String, ordnerId: String) {
+    // Laedt das Dokument in Google Drive hoch (drivePfad kann mehrstufig sein, z.B. "Rechnungen/2026").
+    fun hochladen(dateiname: String, drivePfad: String, token: String, ordnerId: String) {
         _zustand.value = DokumentZustand.LaeadtHoch
         aktuellerJob = viewModelScope.launch {
             try {
                 val uri = aktuelleUri ?: throw Exception("Keine Datei geladen")
                 val inhalt = DokumentLeser.bildAlsBytes(uri, getApplication()) ?: throw Exception("Datei nicht lesbar")
-                val unterordnerId = DriveVerbindung.unterordnerSicherstellen(token, ordnerId, unterordner)
-                DriveVerbindung.dateiHochladen(token, unterordnerId, dateiname, aktuelleMimeType ?: "image/jpeg", inhalt)
-                verlauf.eintragHinzufuegen(VerlaufEintrag(dateiname, dateiname, unterordner))
-                _zustand.value = DokumentZustand.Fertig(dateiname, unterordner)
+                val zielOrdnerId = DriveVerbindung.pfadSicherstellen(token, ordnerId, drivePfad)
+                DriveVerbindung.dateiHochladen(token, zielOrdnerId, dateiname, aktuelleMimeType ?: "image/jpeg", inhalt)
+                verlauf.eintragHinzufuegen(VerlaufEintrag(dateiname, dateiname, drivePfad))
+                _zustand.value = DokumentZustand.Fertig(dateiname, drivePfad)
             } catch (e: Exception) {
                 _zustand.value = DokumentZustand.Fehler(e.message ?: "Upload fehlgeschlagen")
             }

@@ -87,6 +87,16 @@ object DriveVerbindung {
         token: String, elternId: String, name: String
     ): String = DriveUpload.unterordnerSicherstellen(token, elternId, name)
 
+    // Stellt einen mehrstufigen Pfad sicher (z.B. "Rechnungen/2026").
+    suspend fun pfadSicherstellen(token: String, wurzelId: String, pfad: String): String {
+        val teile = pfad.split("/").map { it.trim() }.filter { it.isNotBlank() }
+        var aktuelleId = wurzelId
+        for (teil in teile) {
+            aktuelleId = DriveUpload.unterordnerSicherstellen(token, aktuelleId, teil)
+        }
+        return aktuelleId
+    }
+
     // Laedt den Inhalt eines Drive-Ordners.
     suspend fun ordnerInhaltLaden(token: String, ordnerId: String): List<DriveOrdnerDatei> =
         withContext(Dispatchers.IO) {

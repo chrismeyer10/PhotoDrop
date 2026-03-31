@@ -96,7 +96,7 @@ private fun ApiKeyAbschnittFuerAnbieter(
         )
         KiAnbieter.GptMini -> ApiSchluesselAbschnitt(
             titel = "OpenAI API-Schluessel",
-            hinweis = "Benoetigt fuer GPT-4o-mini. Erhaltlich unter platform.openai.com.",
+            hinweis = "Benoetigt fuer GPT-4o-mini. Guenstig, aber kein kostenloser API-Tier verfuegbar. Erhaltlich unter platform.openai.com.",
             platzhalter = "sk-...",
             schluessel = openAiKey,
             istGespeichert = istOpenAiGespeichert,

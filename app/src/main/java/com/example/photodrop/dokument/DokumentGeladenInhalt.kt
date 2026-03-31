@@ -1,5 +1,6 @@
 package com.example.photodrop.dokument
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,22 +21,25 @@ import com.example.photodrop.ui.theme.OberflächenFarbe
 import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextHell
 
-// Zeigt Optionen fuer das geladene Dokument: Analysieren oder Zurueck.
+// Zeigt die Dokumentvorschau und Optionen: Analysieren oder Zurueck.
 @Composable
-fun DokumentGeladenInhalt(onAnalysieren: () -> Unit = {}, onZurueck: () -> Unit = {}) {
+fun DokumentGeladenInhalt(
+    vorschau: Bitmap? = null,
+    onAnalysieren: () -> Unit = {},
+    onZurueck: () -> Unit = {}
+) {
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Dokument geladen", color = TextHell)
-        Spacer(modifier = Modifier.height(24.dp))
+        DokumentVorschauBild(vorschau = vorschau)
+        Spacer(modifier = Modifier.weight(1f))
         Button(
             onClick = onAnalysieren,
             modifier = Modifier.fillMaxWidth().height(56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = AkzentFarbe)
         ) { Text("Mit KI analysieren") }
-        Spacer(modifier = Modifier.height(12.dp))
         Button(
             onClick = onZurueck,
             modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -44,8 +48,8 @@ fun DokumentGeladenInhalt(onAnalysieren: () -> Unit = {}, onZurueck: () -> Unit 
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Geladen")
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Geladen ohne Vorschau")
 @Composable
 private fun DokumentGeladenInhaltVorschau() {
-    PhotoDropTheme { DokumentGeladenInhalt() }
+    PhotoDropTheme { DokumentGeladenInhalt(vorschau = null) }
 }
