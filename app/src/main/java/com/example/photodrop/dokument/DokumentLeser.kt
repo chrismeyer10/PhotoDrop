@@ -45,13 +45,16 @@ object DokumentLeser {
         }
     }
 
-    // Erstellt eine Vorschau-Bitmap aus der ersten PDF-Seite.
+    // Erstellt eine Vorschau-Bitmap aus der ersten PDF-Seite (weisser Hintergrund).
     fun pdfVorschauErstellen(uri: Uri, context: Context): Bitmap? {
         return try {
             val fd = context.contentResolver.openFileDescriptor(uri, "r") ?: return null
             val renderer = PdfRenderer(fd)
             val seite = renderer.openPage(0)
             val bitmap = Bitmap.createBitmap(seite.width, seite.height, Bitmap.Config.ARGB_8888)
+            // Weissen Hintergrund setzen, damit transparente PDF-Seiten nicht schwarz erscheinen.
+            val canvas = android.graphics.Canvas(bitmap)
+            canvas.drawColor(android.graphics.Color.WHITE)
             seite.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
             seite.close()
             renderer.close()

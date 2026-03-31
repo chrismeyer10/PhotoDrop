@@ -21,7 +21,9 @@ sealed interface DokumentZustand {
         val vorschau: Bitmap?,
         val dateiname: String,
         val unterordner: String,
-        val begruendung: String
+        val begruendung: String,
+        // Vollstaendiger Drive-Pfad, z.B. "Rechnungen/2024" (optional, KI-Vorschlag).
+        val drivePfad: String = ""
     ) : DokumentZustand
 
     // Datei wird hochgeladen.

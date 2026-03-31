@@ -9,7 +9,7 @@ sealed class KiAnbieter(
     // Anthropic Claude — leistungsstark, eigener API-Key noetig.
     object Claude : KiAnbieter("Claude (Anthropic)", "claude-sonnet-4-20250514", true)
 
-    // OpenAI GPT-4o-mini — guenstig, eigener API-Key noetig.
+    // OpenAI GPT-4o-mini — guenstig (~$0.15/1M Token), eigener API-Key noetig. Kein kostenloser API-Tier verfuegbar.
     object GptMini : KiAnbieter("GPT-4o-mini (OpenAI)", "gpt-4o-mini", true)
 
     // Kostenlose OCR-Texterkennung via ML Kit — kein API-Key noetig.

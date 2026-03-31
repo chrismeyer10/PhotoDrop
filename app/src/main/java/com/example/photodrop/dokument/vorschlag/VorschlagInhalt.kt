@@ -1,8 +1,6 @@
 package com.example.photodrop.dokument.vorschlag
 
-import android.graphics.Bitmap
 import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -22,10 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.photodrop.dokument.DokumentVorschauBild
 import com.example.photodrop.dokument.DokumentZustand
 import com.example.photodrop.ui.theme.AkzentFarbe
 import com.example.photodrop.ui.theme.OberflächenFarbe
@@ -33,7 +31,7 @@ import com.example.photodrop.ui.theme.PhotoDropTheme
 import com.example.photodrop.ui.theme.TextGedaempft
 import com.example.photodrop.ui.theme.TextHell
 
-// Zeigt den KI-Vorschlag mit editierbaren Feldern fuer Dateiname und Unterordner.
+// Zeigt den KI-Vorschlag mit editierbaren Feldern fuer Dateiname und Drive-Pfad.
 @Composable
 fun VorschlagInhalt(
     zustand: DokumentZustand.VorschlagBereit,
@@ -41,36 +39,35 @@ fun VorschlagInhalt(
     onZurueck: () -> Unit = {}
 ) {
     var dateiname by remember(zustand.dateiname) { mutableStateOf(zustand.dateiname) }
-    var unterordner by remember(zustand.unterordner) { mutableStateOf(zustand.unterordner) }
+    val startPfad = if (zustand.drivePfad.isNotBlank()) zustand.drivePfad else zustand.unterordner
+    var drivePfad by remember(startPfad) { mutableStateOf(startPfad) }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        zustand.vorschau?.let { bitmap ->
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Dokumentvorschau",
-                modifier = Modifier.fillMaxWidth().height(180.dp),
-                contentScale = ContentScale.Fit
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-        }
+        DokumentVorschauBild(vorschau = zustand.vorschau)
+
+        Text(
+            "KI-Vorschlag bestätigen",
+            style = MaterialTheme.typography.titleMedium,
+            color = TextHell
+        )
 
         OutlinedTextField(
             value = dateiname,
             onValueChange = { dateiname = it },
-            label = { Text("Dateiname") },
+            label = { Text("Dateiname", color = TextGedaempft) },
             modifier = Modifier.fillMaxWidth(),
             colors = textFeldFarben(),
             singleLine = true
         )
 
         OutlinedTextField(
-            value = unterordner,
-            onValueChange = { unterordner = it },
-            label = { Text("Unterordner") },
+            value = drivePfad,
+            onValueChange = { drivePfad = it },
+            label = { Text("Drive-Pfad (z.B. Rechnungen/2026)", color = TextGedaempft) },
             modifier = Modifier.fillMaxWidth(),
             colors = textFeldFarben(),
             singleLine = true
@@ -80,6 +77,7 @@ fun VorschlagInhalt(
             Text(
                 text = zustand.begruendung,
                 color = TextGedaempft,
+                style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -87,10 +85,11 @@ fun VorschlagInhalt(
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = { onHochladen(dateiname, unterordner) },
+            onClick = { onHochladen(dateiname, drivePfad) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = AkzentFarbe)
-        ) { Text("Akzeptieren") }
+            colors = ButtonDefaults.buttonColors(containerColor = AkzentFarbe),
+            enabled = dateiname.isNotBlank() && drivePfad.isNotBlank()
+        ) { Text("Akzeptieren & hochladen") }
 
         Button(
             onClick = onZurueck,
@@ -112,7 +111,7 @@ private fun textFeldFarben() = OutlinedTextFieldDefaults.colors(
     cursorColor = AkzentFarbe
 )
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Vorschlag")
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Vorschlag mit Pfad")
 @Composable
 private fun VorschlagInhaltVorschau() {
     PhotoDropTheme {
@@ -122,7 +121,8 @@ private fun VorschlagInhaltVorschau() {
                 vorschau = null,
                 dateiname = "Rechnung_Amazon_2026-03.pdf",
                 unterordner = "Rechnungen",
-                begruendung = "Amazon-Rechnung erkannt, Datum Maerz 2026."
+                begruendung = "Amazon-Rechnung erkannt, Datum Maerz 2026.",
+                drivePfad = "Rechnungen/2026"
             )
         )
     }
