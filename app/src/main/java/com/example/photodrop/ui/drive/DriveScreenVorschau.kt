@@ -2,6 +2,7 @@ package com.example.photodrop.ui.drive
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.photodrop.ui.drive.api.DriveOrdner
 import com.example.photodrop.ui.drive.api.DriveOrdnerDatei
 import com.example.photodrop.ui.drive.zustand.DriveZustand
 import com.example.photodrop.ui.theme.PhotoDropTheme
@@ -54,6 +55,31 @@ private fun DriveInhaltFehlerVorschau() {
     PhotoDropTheme {
         DriveInhalt(
             DriveZustand.Fehler("Anmeldung fehlgeschlagen: 12500"),
+            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Ordner auswaehlen mit Abmelden")
+@Composable
+private fun DriveInhaltOrdnerAuswaehlenVorschau() {
+    PhotoDropTheme {
+        DriveInhalt(
+            DriveZustand.OrdnerAuswaehlen(
+                "max@gmail.com", "token",
+                listOf(DriveOrdner("id1", "PhotoDrop")), null
+            ),
+            {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0A, name = "Ordner benennen mit Abmelden")
+@Composable
+private fun DriveInhaltOrdnerBenennenVorschau() {
+    PhotoDropTheme {
+        DriveInhalt(
+            DriveZustand.OrdnerBenennen("max@gmail.com", "token"),
             {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
         )
     }

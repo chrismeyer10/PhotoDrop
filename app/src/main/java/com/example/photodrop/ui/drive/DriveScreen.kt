@@ -87,9 +87,13 @@ fun DriveInhalt(
                     }
                 },
                 actions = {
-                    val istVerbunden = zustand is DriveZustand.Verbunden
+                    // Abmelden-Button fuer alle angemeldeten Zustaende anzeigen.
+                    val istAngemeldet = zustand is DriveZustand.Verbunden
                             || zustand is DriveZustand.InhaltGeladen
-                    if (istVerbunden) {
+                            || zustand is DriveZustand.OrdnerLaden
+                            || zustand is DriveZustand.OrdnerAuswaehlen
+                            || zustand is DriveZustand.OrdnerBenennen
+                    if (istAngemeldet) {
                         IconButton(onClick = onAbmelden) {
                             Icon(Icons.AutoMirrored.Filled.Logout, "Abmelden", tint = TextGedaempft)
                         }
