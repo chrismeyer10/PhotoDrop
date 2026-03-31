@@ -83,17 +83,21 @@ private fun ApiKeyAbschnittFuerAnbieter(
     onOpenAiLoeschen: () -> Unit
 ) {
     when (anbieter) {
-        KiAnbieter.Claude -> ApiSchluesselAbschnitt(
-            titel = "Anthropic API-Schluessel",
-            hinweis = "Benoetigt fuer Claude. Erhaltlich unter console.anthropic.com.",
-            platzhalter = "sk-ant-...",
-            schluessel = anthropicKey,
-            istGespeichert = istAnthropicGespeichert,
-            testLaeuft = testLaeuft,
-            onSchluesselAendern = onAnthropicKeyAendern,
-            onSpeichern = onAnthropicSpeichern,
-            onLoeschen = onAnthropicLoeschen
-        )
+        KiAnbieter.Claude -> Column {
+            AnthropicSchluesselHilfe()
+            Spacer(modifier = Modifier.height(16.dp))
+            ApiSchluesselAbschnitt(
+                titel = "Anthropic API-Schluessel",
+                hinweis = "Benoetigt fuer Claude. Kein Claude.ai-Abo — separater API-Account noetig.",
+                platzhalter = "sk-ant-...",
+                schluessel = anthropicKey,
+                istGespeichert = istAnthropicGespeichert,
+                testLaeuft = testLaeuft,
+                onSchluesselAendern = onAnthropicKeyAendern,
+                onSpeichern = onAnthropicSpeichern,
+                onLoeschen = onAnthropicLoeschen
+            )
+        }
         KiAnbieter.GptMini -> ApiSchluesselAbschnitt(
             titel = "OpenAI API-Schluessel",
             hinweis = "Benoetigt fuer GPT-4o-mini. Guenstig, aber kein kostenloser API-Tier verfuegbar. Erhaltlich unter platform.openai.com.",

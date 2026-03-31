@@ -99,7 +99,10 @@ private fun verbindungsFehlerText(rohMeldung: String): String {
         "401" in klein || "unauthorized" in klein || "authentication" in klein ->
             "Schluessel ungueltig. Bitte pruefen ob der Key korrekt kopiert wurde.\n\nAPI: ${rohMeldung.take(200)}"
         "credit balance" in klein || "billing" in klein ->
-            "Kontoguthaben erschoepft (API: ${rohMeldung.take(200)})"
+            "Kontoguthaben erschoepft.\n\n" +
+            "Hinweis: Ein Claude.ai-Abo gibt KEINEN API-Zugriff. " +
+            "Bitte unter console.anthropic.com ein Konto anlegen und Credits kaufen.\n\n" +
+            "API: $rohMeldung"
         "rate limit" in klein || "429" in klein ->
             "Zu viele Anfragen. Bitte kurz warten.\n\nAPI: ${rohMeldung.take(200)}"
         "network" in klein || "connect" in klein ->
