@@ -1,7 +1,9 @@
 package com.example.photodrop.ui.drive
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.photodrop.ui.drive.anmeldung.DriveAnmeldung
@@ -18,6 +20,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 // Verwaltet die Google Drive Verbindung und den Zustandsfluss.
 class DriveViewModel(application: Application) : AndroidViewModel(application) {
@@ -28,6 +33,10 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _zustand = MutableStateFlow<DriveZustand>(DriveZustand.NichtVerbunden)
     val zustand: StateFlow<DriveZustand> = _zustand
+
+    // Zustand des Schnell-Foto-Uploads (null = kein aktiver Upload).
+    private val _schnellUploadZustand = MutableStateFlow<SchnellUploadZustand?>(null)
+    val schnellUploadZustand: StateFlow<SchnellUploadZustand?> = _schnellUploadZustand
 
     // Aktueller Lade-Job, damit er bei Abbruch gecancelt werden kann.
     private var ladeJob: Job? = null
@@ -223,6 +232,49 @@ class DriveViewModel(application: Application) : AndroidViewModel(application) {
             else -> return
         }
         ladeJob = viewModelScope.launch { ordnerInhaltLaden(token, kontoName, ordnerId) }
+    }
+
+    // Laedt ein Foto direkt in den verbundenen Ordner hoch (Schnellmenue-Funktion).
+    fun fotoSchnellHochladen(fotoUri: Uri, context: Context) {
+        val aktuell = _zustand.value
+        val token = when (aktuell) {
+            is DriveZustand.InhaltGeladen -> aktuell.token
+            is DriveZustand.Verbunden -> aktuell.token
+            else -> null
+        }
+        val ordnerId = when (aktuell) {
+            is DriveZustand.InhaltGeladen -> aktuell.ordnerId
+            is DriveZustand.Verbunden -> aktuell.ordnerId
+            else -> null
+        }
+        val ordnerNameAktuell = ordnerPrefs.ordnerName ?: "Drive"
+
+        if (token == null || ordnerId == null) {
+            _schnellUploadZustand.value = SchnellUploadZustand.Fehler("Kein Drive-Ordner verbunden.")
+            return
+        }
+
+        _schnellUploadZustand.value = SchnellUploadZustand.Laedt
+        viewModelScope.launch {
+            try {
+                val bytes = withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(fotoUri)?.readBytes()
+                } ?: throw Exception("Foto nicht lesbar")
+                val dateiname = "foto_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())}.jpg"
+                DriveVerbindung.dateiHochladen(token, ordnerId, dateiname, "image/jpeg", bytes)
+                _schnellUploadZustand.value = SchnellUploadZustand.Fertig(dateiname, ordnerNameAktuell)
+                inhaltNeuLaden()
+            } catch (e: Exception) {
+                _schnellUploadZustand.value = SchnellUploadZustand.Fehler(
+                    e.message ?: "Upload fehlgeschlagen"
+                )
+            }
+        }
+    }
+
+    // Setzt den Schnell-Upload-Zustand zurueck.
+    fun schnellUploadZuruecksetzen() {
+        _schnellUploadZustand.value = null
     }
 
     // Setzt den Zustand zurueck.
