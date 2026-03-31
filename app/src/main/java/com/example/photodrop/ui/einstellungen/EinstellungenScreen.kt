@@ -92,17 +92,18 @@ private suspend fun verbindungTesten(
 }
 
 // Wandelt eine Fehlermeldung in einen nutzerfreundlichen Text um.
+// Zeigt immer die rohe API-Meldung an, damit der Nutzer den genauen Fehlergrund sieht.
 private fun verbindungsFehlerText(rohMeldung: String): String {
     val klein = rohMeldung.lowercase()
     return when {
         "401" in klein || "unauthorized" in klein || "authentication" in klein ->
-            "Schluessel ungueltig. Bitte pruefen ob der Key korrekt kopiert wurde."
+            "Schluessel ungueltig. Bitte pruefen ob der Key korrekt kopiert wurde.\n\nAPI: ${rohMeldung.take(200)}"
         "credit balance" in klein || "billing" in klein ->
-            "Kontoguthaben erschoepft. Bitte Konto pruefen."
+            "Kontoguthaben erschoepft (API: ${rohMeldung.take(200)})"
         "rate limit" in klein || "429" in klein ->
-            "Zu viele Anfragen. Bitte kurz warten und erneut versuchen."
+            "Zu viele Anfragen. Bitte kurz warten.\n\nAPI: ${rohMeldung.take(200)}"
         "network" in klein || "connect" in klein ->
-            "Keine Internetverbindung. Bitte Netzwerk pruefen."
-        else -> "Fehler: ${rohMeldung.take(120)}"
+            "Keine Internetverbindung. Bitte Netzwerk pruefen.\n\nAPI: ${rohMeldung.take(200)}"
+        else -> rohMeldung.take(300)
     }
 }

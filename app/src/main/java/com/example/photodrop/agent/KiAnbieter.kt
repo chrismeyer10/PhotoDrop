@@ -7,7 +7,7 @@ sealed class KiAnbieter(
     val benoetigtApiKey: Boolean
 ) {
     // Anthropic Claude — leistungsstark, eigener API-Key noetig.
-    object Claude : KiAnbieter("Claude (Anthropic)", "claude-sonnet-4-20250514", true)
+    object Claude : KiAnbieter("Claude (Anthropic)", "claude-haiku-4-5-20251001", true)
 
     // OpenAI GPT-4o-mini — guenstig (~$0.15/1M Token), eigener API-Key noetig. Kein kostenloser API-Tier verfuegbar.
     object GptMini : KiAnbieter("GPT-4o-mini (OpenAI)", "gpt-4o-mini", true)
